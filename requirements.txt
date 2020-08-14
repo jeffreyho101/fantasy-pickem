@@ -4,4 +4,4 @@ flask-login
 flask_cors
 flask-sqlalchemy
 sqlalchemy
-pandas
+bcrypt

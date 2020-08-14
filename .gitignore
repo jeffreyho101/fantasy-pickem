@@ -2,3 +2,6 @@ __pycache__
 *.py[cod]
 *.python-version
 .vscode
+
+pickem/db_old
+pickem/*.db

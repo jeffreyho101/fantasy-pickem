@@ -1,17 +1,12 @@
 from flask import Flask, render_template, _app_ctx_stack
 from flask_sqlalchemy import SQLAlchemy
 
-from flask_cors import CORS
+# from flask_cors import CORS
 
-from sqlalchemy.orm import scoped_session
+# from sqlalchemy.orm import scoped_session
 
-# blueprint for auth/main routes in our app
-from .auth import auth as auth_blueprint
-from .main import main as main_blueprint
-from .db import models
-from .db.db_base import SessionLocal, engine
-
-from flask_sqlalchemy import SQLAlchemy
+# from .db import models
+# from .db.db_base import SessionLocal, engine
 
 
 db = SQLAlchemy()
@@ -26,12 +21,19 @@ def create_app():
     app = Flask(__name__)
 
     app.config['SECRET_KEY'] = 'jeff'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/test.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
     db.init_app(app)
     # CORS(app)
     # app.session = scoped_session(SessionLocal, scopefunc=_app_ctx_stack.__ident_func__)
 
+    # import auth, main and register blueprints
+    from .auth import auth as auth_blueprint
+
     app.register_blueprint(auth_blueprint)
+    from .main import main as main_blueprint
+
     app.register_blueprint(main_blueprint)
 
     return app

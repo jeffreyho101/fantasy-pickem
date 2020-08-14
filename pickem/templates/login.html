@@ -26,4 +26,8 @@
         </form>
     </div>
 </div>
+<!-- Handle flashes that get triggered from login -->
+{% for message in get_flashed_messages() %}
+<div class="alert-error">Error: {{ message }}</div>
+{% endfor %}
 {% endblock %}
