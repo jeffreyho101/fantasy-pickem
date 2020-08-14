@@ -17,38 +17,41 @@
 
 <body>
     <section class="hero is-dark is-fullheight">
-
-        <div class="hero-head">
-            <nav class="navbar fixed-top navbar-expand-xl navbar-dark is-dark is-fullheight">
-                <!-- <a class="navbar-brand" href="#">FF Pickem</a> -->
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
-                    aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-                    <div class="navbar-nav ml-auto">
-                        <div class="navbar-end">
-                            <a href="{{ url_for('main.index') }}" class="navbar-item nav-link">
-                                Home
-                            </a>
-                            <a href="{{ url_for('main.profile') }}" class="navbar-item nav-link">
-                                Profile
-                            </a>
-                            <a href="{{ url_for('auth.login') }}" class="navbar-item nav-link">
-                                Login
-                            </a>
-                            <a href="{{ url_for('auth.signup') }}" class="navbar-item nav-link">
-                                Sign Up
-                            </a>
-                            <a href="{{ url_for('auth.logout') }}" class="navbar-item nav-link">
-                                Logout
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-        </div>
-
+        <nav class="navbar navbar-expand-sm navbar-dark is-dark">
+            <a class="navbar-brand" href="#">FF Pickem</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsingNavbarLg">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-collapse collapse" id="collapsingNavbarLg">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a href="{{ url_for('main.index') }}" class="navbar-item nav-link active">
+                            Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('main.profile') }}" class="navbar-item nav-link active">
+                            Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('auth.login') }}" class="navbar-item nav-link active">
+                            Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('auth.signup') }}" class="navbar-item nav-link active">
+                            Sign Up
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('auth.logout') }}" class="navbar-item nav-link active">
+                            Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
         <div class="hero-body">
             <div class="container has-text-centered">
                 {% block content %}
