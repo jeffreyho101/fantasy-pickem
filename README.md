@@ -3,7 +3,9 @@
 Constructing a web app to host a weekly pick-em style series of matchup predictions for fantasy football
 
 
-
+- Frontend: HTML (with bits off css/js/boostrap)
+- Backend: Flask
+- DB: SQLite
 
 
 ### DB Setup:
