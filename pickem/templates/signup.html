@@ -2,16 +2,17 @@
 
 {% block content %}
 
-{% with messages = get_flashed_messages() %}
+{% with messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}
-<div class="notification is-danger">
-    <!-- Handle flashes that get triggered from signup -->
-    {% for message in get_flashed_messages() %}
-    <div class="alert-error">{{ message }}</div>
+<!-- Handle flashes that get triggered from signup -->
+<div class="alert alert-{{ messages.0.0 }}" role="alert">
+    {% for category, message in messages %}
+    {{ message }} </br>
     {% endfor %}
-</div>
-{% endif %}
+</div>{% endif %}
 {% endwith %}
+
+
 <form method="POST" action="/signup">
 
     <div class="column is-4 is-offset-4">

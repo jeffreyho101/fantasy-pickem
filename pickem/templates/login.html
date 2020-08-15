@@ -1,6 +1,17 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<!-- Handle flashes that get triggered from signup -->
+<div class="alert alert-{{ messages.0.0 }}" role="alert">
+    {% for category, message in messages %}
+    {{ message }} </br>
+    {% endfor %}
+</div>{% endif %}
+{% endwith %}
+
 <div class="column is-half is-offset-one-quarter">
     <h3 class="title">Login</h3>
     <div class="box">
@@ -26,8 +37,4 @@
         </form>
     </div>
 </div>
-<!-- Handle flashes that get triggered from login -->
-{% for message in get_flashed_messages() %}
-<div class="alert-error">Error: {{ message }}</div>
-{% endfor %}
 {% endblock %}

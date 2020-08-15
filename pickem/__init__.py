@@ -1,4 +1,5 @@
 from flask import Flask, render_template, _app_ctx_stack
+from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 
 # from flask_cors import CORS
@@ -19,12 +20,26 @@ def create_app():
 
     # create the application object
     app = Flask(__name__)
+    with open("pickem/DB_SECRET_KEY", "r") as file:
+        db_key = file.readline().strip()
 
-    app.config['SECRET_KEY'] = 'jeff'
+    app.config['SECRET_KEY'] = db_key
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)
+
+    login_manager = LoginManager()
+    login_manager.login_view = 'auth.login'
+    login_manager.init_app(app)
+
+    from .models import User
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        # since the user_id is just the primary key of our user table, use it in the query for the user
+        return User.query.get(int(user_id))
+
     # CORS(app)
     # app.session = scoped_session(SessionLocal, scopefunc=_app_ctx_stack.__ident_func__)
 
