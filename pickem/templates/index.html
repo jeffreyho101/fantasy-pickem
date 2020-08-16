@@ -4,7 +4,13 @@
 <h1 class="title">
     Fantasy Football Pick-em
 </h1>
+{% if not current_user.is_authenticated %}
 <h2 class="subtitle">
     <u><a href="/login">Login</a></u> to start
 </h2>
+{% else %}
+<h2 class="subtitle">
+    Make your picks or view the standings by clicking the respective tab above!
+</h2>
+{% endif %}
 {% endblock %}
