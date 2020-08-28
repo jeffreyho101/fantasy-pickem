@@ -5,3 +5,6 @@ flask_cors
 flask-sqlalchemy
 sqlalchemy
 bcrypt
+bs4
+requests
+lxml
