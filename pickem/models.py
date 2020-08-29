@@ -25,6 +25,9 @@ class Games(UserMixin, db.Model):
     week = db.Column(db.Integer)
     road_team = db.Column(db.String(100))
     home_team = db.Column(db.String(100))
+    # game_date: of format "YYYY-MM-DD"
+    game_date = db.Column(db.String(10))
+    game_time = db.Column(db.String(10))
     road_pts = db.Column(db.Integer)
     home_pts = db.Column(db.Integer)
     final = db.Column(db.Boolean)

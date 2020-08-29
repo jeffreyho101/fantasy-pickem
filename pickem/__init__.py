@@ -102,6 +102,8 @@ def init_schedule():
                 week=row['week'],
                 road_team=row['road_team'],
                 home_team=row['home_team'],
+                game_date='',
+                game_time='',
                 road_pts=0,
                 home_pts=0,
                 final=False,

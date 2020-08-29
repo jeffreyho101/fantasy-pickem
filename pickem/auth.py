@@ -92,7 +92,7 @@ def signup_post():
 
     # return redirect to a login page so that new user can login
     flash("Successfuly created account. Proceed to login.", 'success')
-    return redirect(url_for('auth.login'))
+    return redirect(url_for('auth.signup'))
 
 
 @auth.route('/logout')
