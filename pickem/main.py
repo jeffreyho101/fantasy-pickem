@@ -94,6 +94,13 @@ def week_picks():
     )
 
 
+@main.route('/week_picks', methods=['POST'])
+def week_picks_post():
+    # current_user.email used to look up id
+    # write picks to table
+    pass
+
+
 @main.route('/standings', endpoint='standings')
 @login_required
 def standings():

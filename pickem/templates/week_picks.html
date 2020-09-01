@@ -2,6 +2,34 @@
 
 {% block content %}
 <h1 class="title">
-    Week 1 Picks
+    Week {{week}} Picks
 </h1>
+{% for game in games_sql %}
+<form method="POST" action="/week_picks">
+    <hr>
+    <div style="display: table; table-layout: fixed; margin: 0 auto;">
+        <div style="display: inline-block; width: 60px;">
+            <label for="male">{{game.road_team}}</label>
+        </div>
+        <div style="display: inline-block;">
+            <input type="radio" id="male" name="gender" value="male">
+        </div>
+        <div style="display: inline-block; padding: 0px 50px; margin:0 auto;">vs.</div>
+        <div style="display: inline-block;">
+            <input type="radio" id="female" name="gender" value="female">
+        </div>
+        <div style="display: inline-block; width: 60px;">
+            <label for="female">{{game.home_team}}</label><br>
+        </div>
+    </div>
+</form>
+{% endfor %}
+</hr>
+
+<br>
+<div class="control">
+    <button class="button is-success is-large"
+        style="display: block; margin-left: auto; margin-right: auto;">Submit</button>
+</div>
+
 {% endblock %}
