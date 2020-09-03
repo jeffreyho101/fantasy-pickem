@@ -12,10 +12,15 @@ class User(UserMixin, db.Model):
 
 
 class Picks(UserMixin, db.Model):
-    game_id = db.Column(
-        db.Integer, primary_key=True
-    )  # primary keys are required by SQLAlchemy
+    id = db.Column(db.Integer, primary_key=True)  # id is useless in this table
+    game_id = db.Column(db.Integer)
+    user_id = db.Column(db.Integer)
+    week = db.Column(db.Integer)
+    # pick: team initial of the pick they make
     pick = db.Column(db.String(100))
+    # winner: team initial of the winner of the game (added later)
+    # if game ends in tie, winner = 'TIE
+    winner = db.Column(db.String(100))
 
 
 class Games(UserMixin, db.Model):
@@ -31,4 +36,5 @@ class Games(UserMixin, db.Model):
     road_pts = db.Column(db.Integer)
     home_pts = db.Column(db.Integer)
     final = db.Column(db.Boolean)
+    # winner: team initial of the winner of the game (added later)
     winner = db.Column(db.String(100))

@@ -1,8 +1,10 @@
 from datetime import datetime
 
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request
 from flask_login import login_required, current_user
 import pandas as pd
+
+from . import db
 
 main = Blueprint('main', __name__)
 
@@ -81,24 +83,74 @@ def get_week():
 @main.route('/week_picks', endpoint='week_picks')
 @login_required
 def week_picks():
+    # do a lookup of picks beforehand; autofill radio buttons if picks were made
+
     week = get_week()
     from .models import Games
 
     week_games = Games.query.filter_by(week=week)
+
     games_all = week_games.all()
     # in the event we need the df:
     games_df = pd.read_sql(week_games.statement, week_games.session.bind)
 
+    from .models import Picks
+
+    user_picks = (
+        Picks.query.filter_by(user_id=current_user.id, week=week)
+        .with_entities(Picks.pick)
+        .all()
+    )
+    up_list = [up[0] for up in user_picks]
+
     return render_template(
-        'week_picks.html', week=week, games_sql=games_all, games_df=games_df
+        'week_picks.html', week=week, games_sql=games_all, user_picks_list=up_list
     )
 
 
 @main.route('/week_picks', methods=['POST'])
 def week_picks_post():
-    # current_user.email used to look up id
-    # write picks to table
-    pass
+
+    # TODO: MAKE FORM READ-ONLY AFTER DEADLINE
+
+    week = get_week()
+    from .models import Picks
+
+    option = request.form
+    game_id = next(option.keys())
+    selected_pick = option[game_id]
+
+    saved_pick = Picks.query.filter_by(
+        user_id=current_user.id, week=week, game_id=game_id
+    ).first()
+    # only rewrite to db if the pick changes
+    if saved_pick is None:
+        new_pick = Picks(
+            game_id=game_id, user_id=current_user.id, week=week, pick=selected_pick
+        )
+        db.session.add(new_pick)
+        db.session.commit()
+
+    elif saved_pick.pick != selected_pick:
+        saved_pick.pick = selected_pick
+        db.session.commit()
+
+    from .models import Games
+
+    week_games = Games.query.filter_by(week=week)
+    games_all = week_games.all()
+
+    # do a lookup of picks beforehand; autofill radio buttons if picks were made
+    user_picks = (
+        Picks.query.filter_by(user_id=current_user.id, week=week)
+        .with_entities(Picks.pick)
+        .all()
+    )
+    up_list = [up[0] for up in user_picks]
+
+    return render_template(
+        'week_picks.html', week=week, games_sql=games_all, user_picks_list=up_list
+    )
 
 
 @main.route('/standings', endpoint='standings')

@@ -4,32 +4,31 @@
 <h1 class="title">
     Week {{week}} Picks
 </h1>
+<br>
 {% for game in games_sql %}
 <form method="POST" action="/week_picks">
-    <hr>
     <div style="display: table; table-layout: fixed; margin: 0 auto;">
         <div style="display: inline-block; width: 60px;">
-            <label for="male">{{game.road_team}}</label>
+            <label for={{game.road_team}}>{{game.road_team}}</label>
         </div>
         <div style="display: inline-block;">
-            <input type="radio" id="male" name="gender" value="male">
+            <input type="radio" name="{{game.game_id}}" id="{{game.game_id}}" value={{game.road_team}}
+                {{'checked' if game.road_team in user_picks_list}} onchange='this.form.submit();'>
         </div>
         <div style="display: inline-block; padding: 0px 50px; margin:0 auto;">vs.</div>
         <div style="display: inline-block;">
-            <input type="radio" id="female" name="gender" value="female">
+            <input type="radio" name="{{game.game_id}}" id="{{game.game_id}}" value={{game.home_team}}
+                {{'checked' if game.home_team in user_picks_list}} onchange='this.form.submit();'>
         </div>
         <div style="display: inline-block; width: 60px;">
-            <label for="female">{{game.home_team}}</label><br>
+            <label for={{game.home_team}}>{{game.home_team}}</label><br>
         </div>
     </div>
+    <br>
 </form>
 {% endfor %}
 </hr>
 
-<br>
-<div class="control">
-    <button class="button is-success is-large"
-        style="display: block; margin-left: auto; margin-right: auto;">Submit</button>
-</div>
+
 
 {% endblock %}
