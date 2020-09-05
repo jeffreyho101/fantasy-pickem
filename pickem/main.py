@@ -5,6 +5,8 @@ from flask_login import login_required, current_user
 import pandas as pd
 
 from . import db
+from .models import Games, Picks
+
 
 main = Blueprint('main', __name__)
 
@@ -24,23 +26,29 @@ def date_inbetween(start, end):
     return start <= datetime.now() <= end
 
 
+def season_ended():
+    w17_end = datetime.strptime("12-09-2021", "%d-%m-%Y")
+    return datetime.now() > w17_end
+
+
 def get_week():
-    w2_start = datetime.strptime("14-09-2020", "%d-%m-%Y")
-    w3_start = datetime.strptime("14-09-2020", "%d-%m-%Y")
-    w4_start = datetime.strptime("14-09-2020", "%d-%m-%Y")
-    w5_start = datetime.strptime("14-09-2020", "%d-%m-%Y")
-    w6_start = datetime.strptime("14-09-2020", "%d-%m-%Y")
-    w7_start = datetime.strptime("14-09-2020", "%d-%m-%Y")
-    w8_start = datetime.strptime("14-09-2020", "%d-%m-%Y")
-    w9_start = datetime.strptime("14-09-2020", "%d-%m-%Y")
-    w10_start = datetime.strptime("14-09-2020", "%d-%m-%Y")
-    w11_start = datetime.strptime("14-09-2020", "%d-%m-%Y")
-    w12_start = datetime.strptime("14-09-2020", "%d-%m-%Y")
-    w13_start = datetime.strptime("14-09-2020", "%d-%m-%Y")
-    w14_start = datetime.strptime("14-09-2020", "%d-%m-%Y")
-    w15_start = datetime.strptime("14-09-2020", "%d-%m-%Y")
-    w16_start = datetime.strptime("14-09-2020", "%d-%m-%Y")
-    w17_start = datetime.strptime("14-09-2020", "%d-%m-%Y")
+    w2_start = datetime.strptime("15-09-2020", "%d-%m-%Y")
+    w3_start = datetime.strptime("22-09-2020", "%d-%m-%Y")
+    w4_start = datetime.strptime("29-09-2020", "%d-%m-%Y")
+    w5_start = datetime.strptime("06-10-2020", "%d-%m-%Y")
+    w6_start = datetime.strptime("13-10-2020", "%d-%m-%Y")
+    w7_start = datetime.strptime("20-10-2020", "%d-%m-%Y")
+    w8_start = datetime.strptime("27-10-2020", "%d-%m-%Y")
+    w9_start = datetime.strptime("03-11-2020", "%d-%m-%Y")
+    w10_start = datetime.strptime("10-11-2020", "%d-%m-%Y")
+    w11_start = datetime.strptime("17-11-2020", "%d-%m-%Y")
+    w12_start = datetime.strptime("24-11-2020", "%d-%m-%Y")
+    w13_start = datetime.strptime("08-12-2020", "%d-%m-%Y")
+    w14_start = datetime.strptime("15-12-2020", "%d-%m-%Y")
+    w15_start = datetime.strptime("22-12-2020", "%d-%m-%Y")
+    w16_start = datetime.strptime("29-12-2020", "%d-%m-%Y")
+    w17_start = datetime.strptime("05-12-2020", "%d-%m-%Y")
+    w17_end = datetime.strptime("12-09-2021", "%d-%m-%Y")
     week = 0
     if datetime.now() < w2_start:
         week = 1
@@ -72,11 +80,12 @@ def get_week():
         week = 14
     elif date_inbetween(w15_start, w16_start):
         week = 15
-    elif date_inbetween(w6_start, w17_start):
+    elif date_inbetween(w16_start, w17_start):
         week = 16
-    else:
+    elif date_inbetween(w17_start, w17_end):
         week = 17
-
+    else:
+        week = 18
     return week
 
 
@@ -86,15 +95,12 @@ def week_picks():
     # do a lookup of picks beforehand; autofill radio buttons if picks were made
 
     week = get_week()
-    from .models import Games
 
     week_games = Games.query.filter_by(week=week)
 
     games_all = week_games.all()
     # in the event we need the df:
     games_df = pd.read_sql(week_games.statement, week_games.session.bind)
-
-    from .models import Picks
 
     user_picks = (
         Picks.query.filter_by(user_id=current_user.id, week=week)
@@ -114,7 +120,6 @@ def week_picks_post():
     # TODO: MAKE FORM READ-ONLY AFTER DEADLINE
 
     week = get_week()
-    from .models import Picks
 
     option = request.form
     game_id = next(option.keys())
@@ -135,8 +140,6 @@ def week_picks_post():
         saved_pick.pick = selected_pick
         db.session.commit()
 
-    from .models import Games
-
     week_games = Games.query.filter_by(week=week)
     games_all = week_games.all()
 
@@ -156,5 +159,32 @@ def week_picks_post():
 @main.route('/standings', endpoint='standings')
 @login_required
 def standings():
-    return render_template('standings.html')
+    week = get_week()
+    if season_ended():
+        week = 18
+    results = Picks.query.filter(Picks.winner != None)
+    total_games = len(
+        Picks.query.filter(Picks.winner != None)
+        .with_entities(Picks.game_id)
+        .distinct()
+        .all()
+    )
+    # pandas df shenanigans cause flask-sqlalchemy is fufu
+    results_df = pd.read_sql(results.statement, results.session.bind)
+
+    results_df['correct'] = results_df['pick'] == results_df['winner']
+    records = (
+        results_df[results_df['correct'] == True]
+        .groupby(['user_id', 'name'])['correct']
+        .count()
+        .reset_index()
+        .drop(columns=['user_id'])
+    )
+    records['incorrect'] = total_games - records['correct']
+    records = records.sort_values(by='correct', ascending=False)
+    records_list = records.to_records(index=False).tolist()
+
+    # TODO: make it easier to query with sqlite:
+    # select (*, count(*), 16-count(*)) from picks where (winner not null  and winner = pick) group by user_id order by count(*) desc;
+    return render_template('standings.html', records=records)
 

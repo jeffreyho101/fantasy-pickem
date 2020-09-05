@@ -4,4 +4,41 @@
 <h1 class="title">
     Standings
 </h1>
+<br>
+
+<table>
+    <tr style="outline: thin solid">
+        <div style="display: inline-block; width: 60px;">
+            Name
+        </div>
+        <div style="display: inline-block; width: 60px;">
+            Correct Picks
+        </div>
+        <div style="display: inline-block; width: 10px;">
+
+        </div>
+        <div style="display: inline-block; width: 60px;">
+            Incorrect Picks
+        </div>
+    </tr>
+    <br>
+    {% for index, row in records.iterrows() %}
+    <br>
+    <tr>
+        <div style="display: inline-block; width: 60px;">
+            {{row['name']}}
+        </div>
+        <div style="display: inline-block; width: 60px;">
+            {{row['correct']}}
+        </div>
+        <div style="display: inline-block; width: 10px;">
+            -
+        </div>
+        <div style="display: inline-block; width: 60px;">
+            {{row['incorrect']}}
+        </div>
+    </tr>
+    {% endfor %}
+</table>
+
 {% endblock %}
