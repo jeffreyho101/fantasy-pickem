@@ -7,24 +7,27 @@
 <br>
 {% for game in games_sql %}
 <form method="POST" action="/week_picks">
-    <div style="display: table; table-layout: fixed; margin: 0 auto;">
-        <div style="display: inline-block; width: 60px;">
+    <div style="display: table; table-layout: fixed; margin: 6px auto;">
+        <div
+            style="display: inline-block; width: 100px; padding: 3px; {{'background-color: #787878;' if game.road_team in user_picks_list}}">
+            <img src="static/images/{{game.road_team}}.png" alt="{{game.road_team}}" style="height: 40px;" />
             <label for={{game.road_team}}>{{game.road_team}}</label>
         </div>
-        <div style="display: inline-block;">
+        <div style="display: inline-block; padding: 6px;">
             <input type="radio" name="{{game.game_id}}" id="{{game.game_id}}" value={{game.road_team}}
                 {{'checked' if game.road_team in user_picks_list}} onchange='this.form.submit();'>
         </div>
-        <div style="display: inline-block; padding: 0px 50px; margin:0 auto;">vs.</div>
-        <div style="display: inline-block;">
+        <div style="display: inline-block; padding: 3px 50px; margin:0 auto;">vs.</div>
+        <div style="display: inline-block; padding: 6px;">
             <input type="radio" name="{{game.game_id}}" id="{{game.game_id}}" value={{game.home_team}}
                 {{'checked' if game.home_team in user_picks_list}} onchange='this.form.submit();'>
         </div>
-        <div style="display: inline-block; width: 60px;">
-            <label for={{game.home_team}}>{{game.home_team}}</label><br>
+        <div
+            style="display: inline-block; width: 100px; padding: 3px; {{'background-color: #787878;' if game.home_team in user_picks_list}}">
+            <label for={{game.home_team}}>{{game.home_team}}</label>
+            <img src="static/images/{{game.home_team}}.png" alt="{{game.home_team}}" style="height: 40px;" />
         </div>
     </div>
-    <br>
 </form>
 {% endfor %}
 </hr>
