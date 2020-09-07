@@ -34,20 +34,20 @@
         </div>
     </tr>
     <br>
-    {% for index, row in records.iterrows() %}
+    {% for row in standings %}
     <br>
     <tr>
         <div style="display: inline-block; width: 60px;">
-            {{row['name']}}
+            {{row[0]}}
         </div>
         <div style="display: inline-block; width: 60px;">
-            {{row['correct']}}
+            {{row[1]}}
         </div>
         <div style="display: inline-block; width: 10px;">
             -
         </div>
         <div style="display: inline-block; width: 60px;">
-            {{row['incorrect']}}
+            {{row[2]}}
         </div>
     </tr>
     {% endfor %}

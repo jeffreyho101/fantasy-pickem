@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required, current_user
-import pandas as pd
+from sqlalchemy import text
 
 from . import db
 from .models import Games, Picks
@@ -187,29 +187,19 @@ def standings():
     week = get_week()
     if season_ended():
         week = 18
-    results = Picks.query.filter(Picks.winner != None)
     total_games = len(
         Picks.query.filter(Picks.winner != None)
         .with_entities(Picks.game_id)
         .distinct()
         .all()
     )
-    # pandas df shenanigans cause flask-sqlalchemy is fufu
-    results_df = pd.read_sql(results.statement, results.session.bind)
 
-    results_df['correct'] = results_df['pick'] == results_df['winner']
-    records = (
-        results_df[results_df['correct'] == True]
-        .groupby(['user_id', 'name'])['correct']
-        .count()
-        .reset_index()
-        .drop(columns=['user_id'])
+    # query standings directly from sqlite, output in list format to read into html
+    overall_standings_query = text(
+        f"select name, count(*), {total_games}-count(*) from picks where winner not null  and winner = pick group by user_id order by count(*) desc"
     )
-    records['incorrect'] = total_games - records['correct']
-    records = records.sort_values(by='correct', ascending=False)
-    records_list = records.to_records(index=False).tolist()
+    result = db.engine.execute(overall_standings_query)
+    records = [r for r in result]
 
-    # TODO: make it easier to query with sqlite:
-    # select (*, count(*), 16-count(*)) from picks where (winner not null  and winner = pick) group by user_id order by count(*) desc;
-    return render_template('standings.html', records=records)
+    return render_template('standings.html', standings=records)
 
