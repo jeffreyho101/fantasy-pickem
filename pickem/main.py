@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import Blueprint, render_template, request
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required, current_user
 import pandas as pd
 
@@ -96,7 +96,7 @@ def week_picks():
 
     week = get_week()
 
-    week_games = Games.query.filter_by(week=week)
+    week_games = Picks.query.filter_by(week=week, user_id=current_user.id)
 
     games_all = week_games.all()
     # in the event we need the df:
@@ -108,9 +108,14 @@ def week_picks():
         .all()
     )
     up_list = [up[0] for up in user_picks]
-
+    current_datetime = datetime.now()
     return render_template(
-        'week_picks.html', week=week, games_sql=games_all, user_picks_list=up_list
+        'week_picks.html',
+        week=week,
+        games_sql=games_all,
+        user_picks_list=up_list,
+        current_date=current_datetime.strftime('%Y-%m-%d'),
+        current_time=current_datetime.strftime('%H:%M'),
     )
 
 
@@ -128,19 +133,33 @@ def week_picks_post():
     saved_pick = Picks.query.filter_by(
         user_id=current_user.id, week=week, game_id=game_id
     ).first()
+
     # only rewrite to db if the pick changes
     if saved_pick is None:
-        new_pick = Picks(
-            game_id=game_id, user_id=current_user.id, week=week, pick=selected_pick
+        # check the current time; only create pick if submit time is before game
+        flash(
+            "Internal error. Contact admin for help if this is still an issue.",
+            'danger',
         )
-        db.session.add(new_pick)
-        db.session.commit()
+        return redirect(url_for('main.week_picks'))
 
     elif saved_pick.pick != selected_pick:
-        saved_pick.pick = selected_pick
-        db.session.commit()
+        submit_datetime = datetime.now()
+        submit_date = submit_datetime.strftime('%Y-%m-%d')
+        submit_time = submit_datetime.strftime('%H:%M')
+        if (saved_pick.game_date and saved_pick.game_time) and (
+            submit_date >= saved_pick.game_date and submit_time >= saved_pick.game_time
+        ):
+            flash(
+                f"Didn't save pick change for {saved_pick.road_team} vs. {saved_pick.home_team} because the game has already started",
+                'danger',
+            )
+            return redirect(url_for('main.week_picks'))
+        else:
+            saved_pick.pick = selected_pick
+            db.session.commit()
 
-    week_games = Games.query.filter_by(week=week)
+    week_games = Picks.query.filter_by(week=week, user_id=current_user.id)
     games_all = week_games.all()
 
     # do a lookup of picks beforehand; autofill radio buttons if picks were made
@@ -151,8 +170,14 @@ def week_picks_post():
     )
     up_list = [up[0] for up in user_picks]
 
+    current_datetime = datetime.now()
     return render_template(
-        'week_picks.html', week=week, games_sql=games_all, user_picks_list=up_list
+        'week_picks.html',
+        week=week,
+        games_sql=games_all,
+        user_picks_list=up_list,
+        current_date=current_datetime.strftime('%Y-%m-%d'),
+        current_time=current_datetime.strftime('%H:%M'),
     )
 
 
