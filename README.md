@@ -3,7 +3,7 @@
 Constructing a web app to host a weekly pick-em style series of matchup predictions for fantasy football
 
 
-- Frontend: HTML (with django templating and bits of boostrap)
+- Frontend: HTML (with jinja2 templating and bits of boostrap)
 - Backend: Flask
 - DB: SQLite
 
@@ -29,8 +29,12 @@ This creates all the tables as defined in `models.py`; `init_schedule()` scrapes
 
 ## To run:
 
-- Ensure a FLASK_APP variable is set (ie. to the folder `pickem`):
+- Ensure a FLASK_APP variable is set (ie. to the folder `pickem`). Optionally, flip the `FLASK_DEBUG` flag if you want debug mode to be on.
 ```
 export FLASK_APP=pickem
+export FLASK_DEBUG=1
 ```
-- Run flask app from the root directory: `flask run`
+- Run flask app from the root directory:
+```
+flask run
+```

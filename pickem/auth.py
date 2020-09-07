@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_user, logout_user, login_required
 import bcrypt
 
-from .models import User
+from .models import User, Games, Picks
 from . import db
 
 auth = Blueprint('auth', __name__)
@@ -86,9 +86,41 @@ def signup_post():
         password=bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()),
     )
     db.session.add(new_user)
+
+    # add schedule with all blank picks for new user into Picks table
+    games_list = Games.query.all()
+
+    for game in games_list:
+        new_empty_pick = Picks(
+            user_id=new_user.id,
+            name=new_user.name,
+            week=game.week,
+            game_id=game.game_id,
+            road_team=game.road_team,
+            home_team=game.home_team,
+        )
+        db.session.add(new_empty_pick)
     db.session.commit()
 
-    # TODO: throw popup printing successful account made
+    '''
+    app = db_config()
+    db.init_app(app)
+    with app.app_context():
+        for index, row in sched_list.iterrows():
+            game_add = Games(
+                week=row['week'],
+                road_team=row['road_team'],
+                home_team=row['home_team'],
+                game_date='',
+                game_time='',
+                road_pts=0,
+                home_pts=0,
+                final=False,
+                winner='',
+            )
+            db.session.add(game_add)
+            db.session.commit()
+    '''
 
     # return redirect to a login page so that new user can login
     flash("Successfuly created account. Proceed to login.", 'success')

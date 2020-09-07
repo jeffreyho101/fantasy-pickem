@@ -1,7 +1,63 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<!-- Handle flashes that get triggered from signup -->
+<div class="alert alert-{{ messages.0.0 }}" role="alert">
+    {% for category, message in messages %}
+    {{ message }} </br>
+    {% endfor %}
+</div>{% endif %}
+{% endwith %}
+
 <h1 class="title">
-    Week 1 Picks
+    Week {{week}} Picks
 </h1>
+<br>
+<h5>
+    Select your picks by clicking on their respective radio buttons!
+    <br>
+    Individual picks lock at the start of each game.
+</h5>
+<br>
+{% for game in games_sql %}
+{% set game_datetime = game.game_date + ' ' + game.game_time %}
+<form method="POST" action="/week_picks">
+    <div style="display: table; table-layout: fixed; margin: 6px auto;">
+        <label class="pick"
+            style="cursor: pointer; {{'background-color: #787878;' if game.road_team in user_picks_list}}; width: 120px; padding: 3px;">
+            <div style="display: inline-block;">
+                <img src="static/images/{{game.road_team}}.png" alt="{{game.road_team}}" style="height: 40px;" />
+                {{game.road_team}}
+            </div>
+            <div style="display: inline-block; padding: 6px;">
+                <input type="radio" name="{{game.game_id}}" id="{{game.game_id}}" value={{game.road_team}}
+                    {{'checked' if game.road_team in user_picks_list}}
+                    {{'disabled' if (game.game_date and game.game_time) and (current_datetime >= datetime.strptime(game_datetime, '%Y-%m-%d %H:%M'))}}
+                    onchange='this.form.submit();'>
+            </div>
+        </label>
+        <div style="display: inline-block; padding: 3px 50px; margin:0 auto;">vs.</div>
+        <label class="pick"
+            style="cursor: pointer; {{'background-color: #787878;' if game.home_team in user_picks_list}}; width: 120px; padding: 3px;">
+            <div style="display: inline-block; padding: 6px;">
+                <input type="radio" name="{{game.game_id}}" id="{{game.game_id}}" value={{game.home_team}}
+                    {{'checked' if game.home_team in user_picks_list}}
+                    {{'disabled' if (game.game_date and game.game_time) and (current_datetime >= datetime.strptime(game_datetime, '%Y-%m-%d %H:%M'))}}
+                    onchange='this.form.submit();'>
+            </div>
+            <div style="display: inline-block;">
+                {{game.home_team}}
+                <img src="static/images/{{game.home_team}}.png" alt="{{game.home_team}}" style="height: 40px;" />
+            </div>
+        </label>
+    </div>
+</form>
+{% endfor %}
+</hr>
+
+
+
 {% endblock %}

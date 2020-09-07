@@ -1,7 +1,55 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<!-- Handle flashes that get triggered from signup -->
+<div class="alert alert-{{ messages.0.0 }}" role="alert">
+    {% for category, message in messages %}
+    {{ message }} </br>
+    {% endfor %}
+</div>{% endif %}
+{% endwith %}
+
 <h1 class="title">
     Standings
 </h1>
+<br>
+
+<table>
+    <tr style="outline: thin solid">
+        <div style="display: inline-block; width: 60px;">
+            Name
+        </div>
+        <div style="display: inline-block; width: 60px;">
+            Correct Picks
+        </div>
+        <div style="display: inline-block; width: 10px;">
+
+        </div>
+        <div style="display: inline-block; width: 60px;">
+            Incorrect Picks
+        </div>
+    </tr>
+    <br>
+    {% for row in standings %}
+    <br>
+    <tr>
+        <div style="display: inline-block; width: 60px;">
+            {{row[0]}}
+        </div>
+        <div style="display: inline-block; width: 60px;">
+            {{row[1]}}
+        </div>
+        <div style="display: inline-block; width: 10px;">
+            -
+        </div>
+        <div style="display: inline-block; width: 60px;">
+            {{row[2]}}
+        </div>
+    </tr>
+    {% endfor %}
+</table>
+
 {% endblock %}
