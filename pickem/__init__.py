@@ -63,7 +63,7 @@ def create_app():
 
 
 def init_schedule_locally():
-    return pd.read_csv('pickem/matchups_2020.csv')
+    return pd.read_csv('pickem/static/files/matchups_2020.csv')
 
 
 def init_schedule_espn():
