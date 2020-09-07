@@ -62,7 +62,11 @@ def create_app():
     return app
 
 
-def init_schedule():
+def init_schedule_locally():
+    return pd.read_csv('pickem/matchups_2020.csv')
+
+
+def init_schedule_espn():
     # scrape schedule table from ESPN
     res = requests.get("http://www.espn.com/nfl/schedulegrid")
     soup = BeautifulSoup(res.content, 'lxml')
@@ -92,6 +96,12 @@ def init_schedule():
     sched_list['winner'] = ''
     # sched_list['game_id'] = sched_list.index
     sched_list = sched_list.drop(columns=['index'])
+
+    return sched_list
+
+
+def init_schedule():
+    sched_list = init_schedule_locally()
     from .models import Games
 
     app = db_config()
