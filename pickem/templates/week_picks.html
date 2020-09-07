@@ -12,7 +12,6 @@
 </div>{% endif %}
 {% endwith %}
 
-
 <h1 class="title">
     Week {{week}} Picks
 </h1>
@@ -24,6 +23,7 @@
 </h5>
 <br>
 {% for game in games_sql %}
+{% set game_datetime = game.game_date + ' ' + game.game_time %}
 <form method="POST" action="/week_picks">
     <div style="display: table; table-layout: fixed; margin: 6px auto;">
         <label class="pick"
@@ -35,7 +35,7 @@
             <div style="display: inline-block; padding: 6px;">
                 <input type="radio" name="{{game.game_id}}" id="{{game.game_id}}" value={{game.road_team}}
                     {{'checked' if game.road_team in user_picks_list}}
-                    {{'disabled' if (game.game_date and game.game_time) and (current_date >= game.game_date and current_time >= game.game_time)}}
+                    {{'disabled' if (game.game_date and game.game_time) and (current_datetime >= datetime.strptime(game_datetime, '%Y-%m-%d %H:%M'))}}
                     onchange='this.form.submit();'>
             </div>
         </label>
@@ -45,7 +45,7 @@
             <div style="display: inline-block; padding: 6px;">
                 <input type="radio" name="{{game.game_id}}" id="{{game.game_id}}" value={{game.home_team}}
                     {{'checked' if game.home_team in user_picks_list}}
-                    {{'disabled' if (game.game_date and game.game_time) and (current_date >= game.game_date and current_time >= game.game_time)}}
+                    {{'disabled' if (game.game_date and game.game_time) and (current_datetime >= datetime.strptime(game_datetime, '%Y-%m-%d %H:%M'))}}
                     onchange='this.form.submit();'>
             </div>
             <div style="display: inline-block;">

@@ -26,11 +26,6 @@ def date_inbetween(start, end):
     return start <= datetime.now() <= end
 
 
-def season_ended():
-    w17_end = datetime.strptime("12-09-2021", "%d-%m-%Y")
-    return datetime.now() > w17_end
-
-
 def get_week():
     w2_start = datetime.strptime("15-09-2020", "%d-%m-%Y")
     w3_start = datetime.strptime("22-09-2020", "%d-%m-%Y")
@@ -99,8 +94,9 @@ def week_picks():
     week_games = Picks.query.filter_by(week=week, user_id=current_user.id)
 
     games_all = week_games.all()
+
     # in the event we need the df:
-    games_df = pd.read_sql(week_games.statement, week_games.session.bind)
+    # games_df = pd.read_sql(week_games.statement, week_games.session.bind)
 
     user_picks = (
         Picks.query.filter_by(user_id=current_user.id, week=week)
@@ -114,8 +110,8 @@ def week_picks():
         week=week,
         games_sql=games_all,
         user_picks_list=up_list,
-        current_date=current_datetime.strftime('%Y-%m-%d'),
-        current_time=current_datetime.strftime('%H:%M'),
+        current_datetime=current_datetime,
+        datetime=datetime,
     )
 
 
@@ -145,11 +141,9 @@ def week_picks_post():
 
     elif saved_pick.pick != selected_pick:
         submit_datetime = datetime.now()
-        submit_date = submit_datetime.strftime('%Y-%m-%d')
-        submit_time = submit_datetime.strftime('%H:%M')
-        if (saved_pick.game_date and saved_pick.game_time) and (
-            submit_date >= saved_pick.game_date and submit_time >= saved_pick.game_time
-        ):
+        saved_pick_datetime = saved_pick.game_date + ' ' + saved_pick.game_time
+        game_datetime = datetime.strptime(saved_pick_datetime, '%Y-%m-%d %H:%M')
+        if submit_datetime >= game_datetime:
             flash(
                 f"Didn't save pick change for {saved_pick.road_team} vs. {saved_pick.home_team} because the game has already started",
                 'danger',
@@ -176,17 +170,14 @@ def week_picks_post():
         week=week,
         games_sql=games_all,
         user_picks_list=up_list,
-        current_date=current_datetime.strftime('%Y-%m-%d'),
-        current_time=current_datetime.strftime('%H:%M'),
+        current_datetime=current_datetime,
+        datetime=datetime,
     )
 
 
 @main.route('/standings', endpoint='standings')
 @login_required
 def standings():
-    week = get_week()
-    if season_ended():
-        week = 18
     total_games = len(
         Picks.query.filter(Picks.winner != None)
         .with_entities(Picks.game_id)
@@ -201,5 +192,5 @@ def standings():
     result = db.engine.execute(overall_standings_query)
     records = [r for r in result]
 
-    return render_template('standings.html', standings=records)
+    return render_template('standings.html', standings=records, datetime=datetime)
 
