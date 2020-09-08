@@ -267,13 +267,20 @@ def standings():
         .distinct()
         .all()
     )
+    records = []
+    if total_games == 0:
+        from .models import User
 
-    # query standings directly from sqlite, output in list format to read into html
-    overall_standings_query = text(
-        f"select name, count(*), {total_games}-count(*) from picks where winner not null  and winner = pick group by user_id order by count(*) desc"
-    )
-    result = db.engine.execute(overall_standings_query)
-    records = [r for r in result]
+        users = User.query.with_entities(User.name).all()
+        records = [(r[0], 0, 0) for r in users]
+    else:
+        # query standings directly from sqlite, output in list format to read into html
+        overall_standings_query = text(
+            f"select name, count(*), {total_games}-count(*) from picks where winner not null  and winner = pick group by user_id order by count(*) desc"
+        )
+        result = db.engine.execute(overall_standings_query)
+        records = [r for r in result]
+        breakpoint()
 
     return render_template(
         'standings.html',
