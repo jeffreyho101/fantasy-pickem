@@ -17,47 +17,68 @@
 </h1>
 <br>
 <h5>
-    Select your picks by clicking on their respective radio buttons!
-    <br>
-    Individual picks lock at the start of each game.
+    Select your picks below! Individual picks lock at the start of each game.
 </h5>
 <br>
-{% for game in games_sql %}
-{% set game_datetime = game.game_date + ' ' + game.game_time %}
-<form method="POST" action="/week_picks">
-    <div style="display: table; table-layout: fixed; margin: 6px auto;">
-        <label class="pick"
-            style="cursor: pointer; {{'background-color: #787878;' if game.road_team in user_picks_list}}; width: 120px; padding: 3px;">
-            <div style="display: inline-block;">
-                <img src="static/images/{{game.road_team}}.png" alt="{{game.road_team}}" style="height: 40px;" />
-                {{game.road_team}}
+<table style="margin-left: auto; margin-right: auto;">
+    <tr style="border-bottom: 1px solid white;">
+        <th style="padding: 10px; color: white; text-align: center;">Matchup</th>
+        <th style="padding: 10px; color: white; text-align: center;">Game Time/Pick Deadline</th>
+    </tr>
+
+    <tr>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+    </tr>
+
+    {% for game in games_sql %}
+    {% set game_datetime = datetime.strptime(game.game_date + ' ' + game.game_time, '%Y-%m-%d %H:%M').astimezone(timezone('US/Pacific')) %}
+    <tr>
+        <td style="vertical-align : middle; text-align: center;">
+            <div style="margin: auto;">
+                <form method="POST" action="/week_picks">
+                    <div style="vertical-align: middle; display: table; table-layout: fixed;">
+                        <label class="pick"
+                            style="cursor: pointer; {{'background-color: #787878;' if game.road_team in user_picks_list}}; width: 120px; padding: 3px; margin: 0px;">
+                            <div style="display: inline-block;">
+                                <img src="static/images/{{game.road_team}}.png" alt="{{game.road_team}}"
+                                    style="height: 40px;" />
+                                {{game.road_team}}
+                            </div>
+                            <div style="display: inline-block; padding: 0px 6px;">
+                                <input type="radio" name="{{game.game_id}}" id="{{game.game_id}}"
+                                    value={{game.road_team}} {{'checked' if game.road_team in user_picks_list}}
+                                    {{'disabled' if (game.game_date and game.game_time) and (current_datetime >= game_datetime)}}
+                                    onchange='this.form.submit();'>
+                            </div>
+                        </label>
+                        <div style="display: inline-block; padding: 3px 12px;">vs.</div>
+                        <label class="pick"
+                            style="cursor: pointer; {{'background-color: #787878;' if game.home_team in user_picks_list}}; width: 120px; padding: 3px; margin: 0px;">
+                            <div style="display: inline-block; padding: 0px 6px;">
+                                <input type="radio" name="{{game.game_id}}" id="{{game.game_id}}"
+                                    value={{game.home_team}} {{'checked' if game.home_team in user_picks_list}}
+                                    {{'disabled' if (game.game_date and game.game_time) and (current_datetime >= game_datetime)}}
+                                    onchange='this.form.submit();'>
+                            </div>
+                            <div style="display: inline-block;">
+                                {{game.home_team}}
+                                <img src="static/images/{{game.home_team}}.png" alt="{{game.home_team}}"
+                                    style="height: 40px;" />
+                            </div>
+                        </label>
+                    </div>
+                </form>
             </div>
-            <div style="display: inline-block; padding: 6px;">
-                <input type="radio" name="{{game.game_id}}" id="{{game.game_id}}" value={{game.road_team}}
-                    {{'checked' if game.road_team in user_picks_list}}
-                    {{'disabled' if (game.game_date and game.game_time) and (current_datetime >= datetime.strptime(game_datetime, '%Y-%m-%d %H:%M'))}}
-                    onchange='this.form.submit();'>
+        </td>
+        <td style="vertical-align : middle;">
+            <div style="text-align: center; margin: auto; padding: 20px 20px;">
+                {{game_datetime.astimezone(timezone('UTC')).astimezone(tz=None).strftime('%a, %b %d, %Y %I:%M %p %Z')}}
             </div>
-        </label>
-        <div style="display: inline-block; padding: 3px 50px; margin:0 auto;">vs.</div>
-        <label class="pick"
-            style="cursor: pointer; {{'background-color: #787878;' if game.home_team in user_picks_list}}; width: 120px; padding: 3px;">
-            <div style="display: inline-block; padding: 6px;">
-                <input type="radio" name="{{game.game_id}}" id="{{game.game_id}}" value={{game.home_team}}
-                    {{'checked' if game.home_team in user_picks_list}}
-                    {{'disabled' if (game.game_date and game.game_time) and (current_datetime >= datetime.strptime(game_datetime, '%Y-%m-%d %H:%M'))}}
-                    onchange='this.form.submit();'>
-            </div>
-            <div style="display: inline-block;">
-                {{game.home_team}}
-                <img src="static/images/{{game.home_team}}.png" alt="{{game.home_team}}" style="height: 40px;" />
-            </div>
-        </label>
-    </div>
-</form>
-{% endfor %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
 </hr>
-
-
 
 {% endblock %}

@@ -1,4 +1,5 @@
 from datetime import datetime
+from pytz import timezone, utc
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required, current_user
@@ -23,29 +24,63 @@ def profile():
 
 
 def date_inbetween(start, end):
-    return start <= datetime.now() <= end
+    return start <= datetime.now(timezone('US/Pacific')) <= end
 
 
 def get_week():
-    w2_start = datetime.strptime("15-09-2020", "%d-%m-%Y")
-    w3_start = datetime.strptime("22-09-2020", "%d-%m-%Y")
-    w4_start = datetime.strptime("29-09-2020", "%d-%m-%Y")
-    w5_start = datetime.strptime("06-10-2020", "%d-%m-%Y")
-    w6_start = datetime.strptime("13-10-2020", "%d-%m-%Y")
-    w7_start = datetime.strptime("20-10-2020", "%d-%m-%Y")
-    w8_start = datetime.strptime("27-10-2020", "%d-%m-%Y")
-    w9_start = datetime.strptime("03-11-2020", "%d-%m-%Y")
-    w10_start = datetime.strptime("10-11-2020", "%d-%m-%Y")
-    w11_start = datetime.strptime("17-11-2020", "%d-%m-%Y")
-    w12_start = datetime.strptime("24-11-2020", "%d-%m-%Y")
-    w13_start = datetime.strptime("08-12-2020", "%d-%m-%Y")
-    w14_start = datetime.strptime("15-12-2020", "%d-%m-%Y")
-    w15_start = datetime.strptime("22-12-2020", "%d-%m-%Y")
-    w16_start = datetime.strptime("29-12-2020", "%d-%m-%Y")
-    w17_start = datetime.strptime("05-12-2020", "%d-%m-%Y")
-    w17_end = datetime.strptime("12-09-2021", "%d-%m-%Y")
+    w2_start = datetime.strptime("15-09-2020", "%d-%m-%Y").astimezone(
+        timezone('US/Pacific')
+    )
+    w3_start = datetime.strptime("22-09-2020", "%d-%m-%Y").astimezone(
+        timezone('US/Pacific')
+    )
+    w4_start = datetime.strptime("29-09-2020", "%d-%m-%Y").astimezone(
+        timezone('US/Pacific')
+    )
+    w5_start = datetime.strptime("06-10-2020", "%d-%m-%Y").astimezone(
+        timezone('US/Pacific')
+    )
+    w6_start = datetime.strptime("13-10-2020", "%d-%m-%Y").astimezone(
+        timezone('US/Pacific')
+    )
+    w7_start = datetime.strptime("20-10-2020", "%d-%m-%Y").astimezone(
+        timezone('US/Pacific')
+    )
+    w8_start = datetime.strptime("27-10-2020", "%d-%m-%Y").astimezone(
+        timezone('US/Pacific')
+    )
+    w9_start = datetime.strptime("03-11-2020", "%d-%m-%Y").astimezone(
+        timezone('US/Pacific')
+    )
+    w10_start = datetime.strptime("10-11-2020", "%d-%m-%Y").astimezone(
+        timezone('US/Pacific')
+    )
+    w11_start = datetime.strptime("17-11-2020", "%d-%m-%Y").astimezone(
+        timezone('US/Pacific')
+    )
+    w12_start = datetime.strptime("24-11-2020", "%d-%m-%Y").astimezone(
+        timezone('US/Pacific')
+    )
+    w13_start = datetime.strptime("08-12-2020", "%d-%m-%Y").astimezone(
+        timezone('US/Pacific')
+    )
+    w14_start = datetime.strptime("15-12-2020", "%d-%m-%Y").astimezone(
+        timezone('US/Pacific')
+    )
+    w15_start = datetime.strptime("22-12-2020", "%d-%m-%Y").astimezone(
+        timezone('US/Pacific')
+    )
+    w16_start = datetime.strptime("29-12-2020", "%d-%m-%Y").astimezone(
+        timezone('US/Pacific')
+    )
+    w17_start = datetime.strptime("05-12-2020", "%d-%m-%Y").astimezone(
+        timezone('US/Pacific')
+    )
+    w17_end = datetime.strptime("12-09-2021", "%d-%m-%Y").astimezone(
+        timezone('US/Pacific')
+    )
     week = 0
-    if datetime.now() < w2_start:
+    if datetime.now(timezone('US/Pacific')) < w2_start:
         week = 1
     elif date_inbetween(w2_start, w3_start):
         week = 2
@@ -93,7 +128,9 @@ def week_picks():
 
     week_games = Picks.query.filter_by(week=week, user_id=current_user.id)
 
-    games_all = week_games.all()
+    games_all = week_games.order_by(
+        Picks.game_date, Picks.game_time, Picks.game_id
+    ).all()
 
     # in the event we need the df:
     # games_df = pd.read_sql(week_games.statement, week_games.session.bind)
@@ -101,10 +138,12 @@ def week_picks():
     user_picks = (
         Picks.query.filter_by(user_id=current_user.id, week=week)
         .with_entities(Picks.pick)
+        .order_by(Picks.game_date, Picks.game_time, Picks.game_id)
         .all()
     )
+
     up_list = [up[0] for up in user_picks]
-    current_datetime = datetime.now()
+    current_datetime = datetime.now(timezone('US/Pacific'))
     return render_template(
         'week_picks.html',
         week=week,
@@ -112,6 +151,9 @@ def week_picks():
         user_picks_list=up_list,
         current_datetime=current_datetime,
         datetime=datetime,
+        timezone=timezone,
+        astimezone=datetime.astimezone,
+        utc=utc,
     )
 
 
@@ -140,9 +182,11 @@ def week_picks_post():
         return redirect(url_for('main.week_picks'))
 
     elif saved_pick.pick != selected_pick:
-        submit_datetime = datetime.now()
+        submit_datetime = datetime.now(timezone('US/Pacific'))
         saved_pick_datetime = saved_pick.game_date + ' ' + saved_pick.game_time
-        game_datetime = datetime.strptime(saved_pick_datetime, '%Y-%m-%d %H:%M')
+        game_datetime = datetime.strptime(
+            saved_pick_datetime, '%Y-%m-%d %H:%M'
+        ).astimezone(timezone('US/Pacific'))
         if submit_datetime >= game_datetime:
             flash(
                 f"Didn't save pick change for {saved_pick.road_team} vs. {saved_pick.home_team} because the game has already started",
@@ -154,17 +198,20 @@ def week_picks_post():
             db.session.commit()
 
     week_games = Picks.query.filter_by(week=week, user_id=current_user.id)
-    games_all = week_games.all()
+    games_all = week_games.order_by(
+        Picks.game_date, Picks.game_time, Picks.game_id
+    ).all()
 
     # do a lookup of picks beforehand; autofill radio buttons if picks were made
     user_picks = (
         Picks.query.filter_by(user_id=current_user.id, week=week)
         .with_entities(Picks.pick)
+        .order_by(Picks.game_date, Picks.game_time, Picks.game_id)
         .all()
     )
     up_list = [up[0] for up in user_picks]
 
-    current_datetime = datetime.now()
+    current_datetime = datetime.now(timezone('US/Pacific'))
     return render_template(
         'week_picks.html',
         week=week,
@@ -172,6 +219,9 @@ def week_picks_post():
         user_picks_list=up_list,
         current_datetime=current_datetime,
         datetime=datetime,
+        timezone=timezone,
+        astimezone=datetime.astimezone,
+        utc=utc,
     )
 
 
@@ -192,5 +242,12 @@ def standings():
     result = db.engine.execute(overall_standings_query)
     records = [r for r in result]
 
-    return render_template('standings.html', standings=records, datetime=datetime)
+    return render_template(
+        'standings.html',
+        standings=records,
+        datetime=datetime,
+        timezone=timezone,
+        astimezone=datetime.astimezone,
+        utc=utc,
+    )
 
