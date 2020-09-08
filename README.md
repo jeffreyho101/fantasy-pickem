@@ -25,6 +25,7 @@ init_schedule()
 This creates all the tables as defined in `models.py`; `init_schedule()` scrapes the schedule data from ESPN at the start of the season and turns it into a format that is more readable before writing to the `games` table (*should only be done once total*).
 
 2. Manually: Create the file `pickem/<name_of_db>.db` and manually add the requisite tables in (far larger hassle)
+- *note: by default, this program will save the table as `pickem_tables.db` in method 1 so either use the same name or change this in `__init.py__`*
 
 
 ## To run:

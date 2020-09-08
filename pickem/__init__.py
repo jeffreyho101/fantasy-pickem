@@ -22,7 +22,7 @@ def db_config():
         db_key = file.readline().strip()
 
     app.config['SECRET_KEY'] = db_key
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pickem_tables.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     return app
 
