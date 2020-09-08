@@ -12,11 +12,24 @@ auth = Blueprint('auth', __name__)
 
 @auth.route('/login')
 def login():
+    """
+    login: Display the login page
+
+    Returns:
+        str: A rendering of login.html
+    """
     return render_template('login.html')
 
 
 @auth.route('/login', methods=['POST'])
 def login_post():
+    """
+    login_post: Display the login page after a POST request
+
+    Returns:
+        str: A rendering of the home page if successful, or a rendering of the
+        login page with a danger flash if the user/pass were incorrect
+    """
     email = request.form.get('email')
     password = request.form.get('password').encode('utf-8')
     remember = True if request.form.get('remember') else False
@@ -34,18 +47,29 @@ def login_post():
         )  # if the user doesn't exist or password is wrong, reload the page
 
     # successful login: redirect to main.profile
-    # TODO: change to whatever the landing page(?) should be
     login_user(user, remember=remember)
-    return redirect(url_for('main.profile'))
+    return redirect(url_for('main.index'))
 
 
 @auth.route('/signup')
 def signup():
+    """
+    signup: Display the signup page
+
+    Returns:
+        str: A rendering of the signup page
+    """
     return render_template('signup.html')
 
 
 @auth.route('/signup', methods=['POST'])
 def signup_post():
+    """
+    signup_post: Display the signup page after a POST request
+
+    Returns:
+        str: The signup page with a flashed message depending on the success of new user creation
+    """
     # code to validate and add user to database goes here
     email = request.form.get('email')
     name = request.form.get('name').strip()
@@ -54,10 +78,10 @@ def signup_post():
     email_pattern = re.compile('^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$')
     valid_email = email_pattern.match(email)
     valid_name = name != ''
-    valid_pass = password != ''
+    valid_pass = len(password) >= 8
 
     valid_combo = valid_email and valid_name and valid_pass
-    # TODO: check for valid password being 8+ chars, etc...??
+
     if not valid_combo:
         flash("Couldn't sign up this account for the following reasons:", 'danger')
         if not valid_email:
@@ -71,8 +95,7 @@ def signup_post():
     # check to see if existing user with given email exists in db
     user = User.query.filter_by(email=email).first()
 
-    # if user exists, refresh signup page
-    # TODO: throw an error popup saying that an email already exists for this user
+    # if user with same email exists, refresh signup page
     if user:
         flash(
             'An account with this email already exists. Go to the login page to log in.',
@@ -102,26 +125,6 @@ def signup_post():
         db.session.add(new_empty_pick)
     db.session.commit()
 
-    '''
-    app = db_config()
-    db.init_app(app)
-    with app.app_context():
-        for index, row in sched_list.iterrows():
-            game_add = Games(
-                week=row['week'],
-                road_team=row['road_team'],
-                home_team=row['home_team'],
-                game_date='',
-                game_time='',
-                road_pts=0,
-                home_pts=0,
-                final=False,
-                winner='',
-            )
-            db.session.add(game_add)
-            db.session.commit()
-    '''
-
     # return redirect to a login page so that new user can login
     flash("Successfuly created account. Proceed to login.", 'success')
     return redirect(url_for('auth.signup'))
@@ -130,5 +133,11 @@ def signup_post():
 @auth.route('/logout')
 @login_required
 def logout():
+    """
+    logout: Log a user out
+
+    Returns:
+        str: A rendering of the home page when not authenticated (links to login/signup)
+    """
     logout_user()
     return redirect(url_for('main.index'))

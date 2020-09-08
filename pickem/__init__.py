@@ -5,18 +5,17 @@ from flask_sqlalchemy import SQLAlchemy
 import pandas as pd
 import requests
 
-# from flask_cors import CORS
-
-# from sqlalchemy.orm import scoped_session
-
-# from .db import models
-# from .db.db_base import SessionLocal, engine
-
 
 db = SQLAlchemy()
 
 
 def db_config():
+    """
+    db_config: Initial configuration of the database directly from Flask
+
+    Returns:
+        app: the reference for the Flask app
+    """
     app = Flask(__name__)
     with open("pickem/DB_SECRET_KEY", "r") as file:
         db_key = file.readline().strip()
@@ -28,10 +27,12 @@ def db_config():
 
 
 def create_app():
+    """
+    create_app: Create the app's logins, blueprints, etc.
 
-    # create base metadata and bind to session engine
-    # models.Base.metadata.create_all(bind=engine)
-
+    Returns:
+        app: A partially completed Flask app object
+    """
     # create the application object
     app = db_config()
 
@@ -48,9 +49,6 @@ def create_app():
         # since the user_id is just the primary key of our user table, use it in the query for the user
         return User.query.get(int(user_id))
 
-    # CORS(app)
-    # app.session = scoped_session(SessionLocal, scopefunc=_app_ctx_stack.__ident_func__)
-
     # import auth, main and register blueprints
     from .auth import auth as auth_blueprint
 
@@ -63,10 +61,23 @@ def create_app():
 
 
 def init_schedule_locally():
+    """
+    init_schedule_locally: Read in the initial schedule matchups by week from file
+        (to avoid unncecessary repetitive web scraping).
+
+    Returns:
+        pd.DataFrame: A Pandas DataFrame of (week, road_team, home_team, ...) for the 2020 NFL Season
+    """
     return pd.read_csv('pickem/static/files/matchups_2020.csv')
 
 
 def init_schedule_espn():
+    """
+    init_schedule_espn: Read in the initial schedule matchups by scraping from ESPN and cleaning.
+
+    Returns:
+        pd.DataFrame: A Pandas DataFrame of (week, road_team, home_team, ...) for the 2020 NFL Season
+    """
     # scrape schedule table from ESPN
     res = requests.get("http://www.espn.com/nfl/schedulegrid")
     soup = BeautifulSoup(res.content, 'lxml')
@@ -101,6 +112,10 @@ def init_schedule_espn():
 
 
 def init_schedule():
+    """
+    init_schedule: Create the `games` table by iterating through the Pandas df of matchups
+        and adding them via the Games model
+    """
     sched_list = init_schedule_locally()
     from .models import Games
 

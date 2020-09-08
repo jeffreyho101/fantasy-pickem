@@ -31,11 +31,6 @@
                     </li>
                     {% if current_user.is_authenticated %}
                     <li class="nav-item">
-                        <a href="{{ url_for('main.profile') }}" class="navbar-item nav-link active">
-                            Profile
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a href="{{ url_for('main.week_picks') }}" class="navbar-item nav-link active">
                             Weekly Pickem
                         </a>

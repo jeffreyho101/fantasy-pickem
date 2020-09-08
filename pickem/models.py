@@ -3,6 +3,8 @@ from . import db
 
 
 class User(UserMixin, db.Model):
+    """ Schema for the User table """
+
     id = db.Column(
         db.Integer, primary_key=True
     )  # primary keys are required by SQLAlchemy
@@ -12,6 +14,8 @@ class User(UserMixin, db.Model):
 
 
 class Picks(UserMixin, db.Model):
+    """ Schema for the Picks table """
+
     id = db.Column(db.Integer, primary_key=True)  # id is useless in this table
     user_id = db.Column(db.Integer)
     name = db.Column(db.String(100))
@@ -29,6 +33,8 @@ class Picks(UserMixin, db.Model):
 
 
 class Games(UserMixin, db.Model):
+    """ Schema for the Games table """
+
     game_id = db.Column(
         db.Integer, primary_key=True
     )  # primary keys are required by SQLAlchemy

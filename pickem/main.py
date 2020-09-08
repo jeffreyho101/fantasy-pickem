@@ -14,20 +14,36 @@ main = Blueprint('main', __name__)
 
 @main.route('/')
 def index():
+    """
+    index: Endpoint that renders index.html
+
+    Returns:
+        str: A rendering of index.html
+    """
     return render_template('index.html', current_user=current_user)
 
 
-@main.route('/profile', endpoint='profile')
-@login_required
-def profile():
-    return render_template('profile.html', name=current_user.name)
-
-
 def date_inbetween(start, end):
+    """
+    date_inbetween: determines whether the time is currently between start and end
+
+    Args:
+        start (datetime.datetime): start time
+        end (datetime.datetime): start time
+
+    Returns:
+        bool: Whether the current time is between start and end
+    """
     return start <= datetime.now(timezone('US/Pacific')) <= end
 
 
 def get_week():
+    """
+    get_week: Get the current week based on what time it currently is
+
+    Returns:
+        int: The current week of the NFL season
+    """
     w2_start = datetime.strptime("15-09-2020", "%d-%m-%Y").astimezone(
         timezone('US/Pacific')
     )
@@ -122,8 +138,13 @@ def get_week():
 @main.route('/week_picks', endpoint='week_picks')
 @login_required
 def week_picks():
-    # do a lookup of picks beforehand; autofill radio buttons if picks were made
+    """
+    week_picks: Display a player's weekly picks on a page
 
+    Returns:
+        str: A rendering of week_picks.html with the current week and the user's current picks
+    """
+    # do a lookup of picks beforehand; autofill radio buttons if picks were made
     week = get_week()
 
     week_games = Picks.query.filter_by(week=week, user_id=current_user.id)
@@ -147,6 +168,7 @@ def week_picks():
     return render_template(
         'week_picks.html',
         week=week,
+        name=current_user.name,
         games_sql=games_all,
         user_picks_list=up_list,
         current_datetime=current_datetime,
@@ -159,9 +181,13 @@ def week_picks():
 
 @main.route('/week_picks', methods=['POST'])
 def week_picks_post():
+    """
+    week_picks_post: Display a player's weekly picks on a page after processing POST request on a pick
 
-    # TODO: MAKE FORM READ-ONLY AFTER DEADLINE
-
+    Returns:
+        str: A rendering of week_picks.html with the current week and the user's current picks
+        where the pick made by the user gets updated with a POST request
+    """
     week = get_week()
 
     option = request.form
@@ -215,6 +241,7 @@ def week_picks_post():
     return render_template(
         'week_picks.html',
         week=week,
+        name=current_user.name,
         games_sql=games_all,
         user_picks_list=up_list,
         current_datetime=current_datetime,
@@ -228,6 +255,12 @@ def week_picks_post():
 @main.route('/standings', endpoint='standings')
 @login_required
 def standings():
+    """
+    standings: Display the overall league standings
+
+    Returns:
+        str: A rendering of standings.html with the current standings in desc. order of wins
+    """
     total_games = len(
         Picks.query.filter(Picks.winner != None)
         .with_entities(Picks.game_id)
