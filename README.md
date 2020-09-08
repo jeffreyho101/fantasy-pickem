@@ -39,3 +39,8 @@ export FLASK_DEBUG=1
 ```
 flask run
 ```
+OR
+- Run flask app with `run.py` out of the root directory:
+```
+python run.py
+```

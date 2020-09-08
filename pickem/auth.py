@@ -119,6 +119,8 @@ def signup_post():
             name=new_user.name,
             week=game.week,
             game_id=game.game_id,
+            game_date='2000-01-01',
+            game_time='23:59',
             road_team=game.road_team,
             home_team=game.home_team,
         )
