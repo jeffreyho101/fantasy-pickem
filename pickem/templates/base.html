@@ -40,6 +40,11 @@
                             Standings
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('main.settings') }}" class="navbar-item nav-link active">
+                            User Settings
+                        </a>
+                    </li>
                     {% endif %}
                     {% if not current_user.is_authenticated %}
                     <li class="nav-item">

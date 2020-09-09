@@ -107,6 +107,7 @@ def signup_post():
         email=email,
         name=name,
         password=bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()),
+        timezone='US/Pacific',
     )
     db.session.add(new_user)
 

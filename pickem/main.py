@@ -1,5 +1,6 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from pytz import timezone, utc
+import time
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required, current_user
@@ -180,6 +181,7 @@ def week_picks():
 
 
 @main.route('/week_picks', methods=['POST'])
+@login_required
 def week_picks_post():
     """
     week_picks_post: Display a player's weekly picks on a page after processing POST request on a pick
@@ -280,7 +282,6 @@ def standings():
         )
         result = db.engine.execute(overall_standings_query)
         records = [r for r in result]
-        breakpoint()
 
     return render_template(
         'standings.html',
@@ -289,5 +290,61 @@ def standings():
         timezone=timezone,
         astimezone=datetime.astimezone,
         utc=utc,
+    )
+
+
+@main.route('/settings', endpoint='settings')
+@login_required
+def settings():
+    """
+    settings: Display configurable user settings
+
+    Returns:
+        str: A rendering of settings.html with the current standings in desc. order of wins
+    """
+    user_timezone = current_user.timezone
+    timezones = [
+        "Europe/Berlin",
+        "US/Alaska",
+        "US/Arizona",
+        "US/Central",
+        "US/Eastern",
+        "US/Mountain",
+        "US/Pacific",
+        "UTC",
+    ]
+    return render_template(
+        'settings.html', timezones=timezones, user_timezone=user_timezone
+    )
+
+
+@main.route('/settings', methods=['POST'])
+@login_required
+def settings_post():
+    """
+    settings_post: Send POST request of configurable settings
+
+    Returns:
+        str: A rendering of settings.html with the current standings in desc. order of wins
+    """
+    new_timezone = request.form.get('timezone')
+    from .models import User
+
+    user = User.query.get(current_user.id)
+    user.timezone = new_timezone
+    db.session.commit()
+
+    timezones = [
+        "Europe/Berlin",
+        "US/Alaska",
+        "US/Arizona",
+        "US/Central",
+        "US/Eastern",
+        "US/Mountain",
+        "US/Pacific",
+        "UTC",
+    ]
+    return render_template(
+        'settings.html', timezones=timezones, user_timezone=new_timezone
     )
 
