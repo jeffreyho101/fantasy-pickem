@@ -30,10 +30,9 @@
         <td>&nbsp;</td>
         <td>&nbsp;</td>
     </tr>
-
     {% for game in games_sql %}
     <!-- game_datetime is in PST -->
-    {% set game_datetime = datetime.strptime(game.game_date + ' ' + game.game_time, '%Y-%m-%d %H:%M').astimezone(timezone('US/Pacific')) %}
+    {% set game_datetime = timezone('US/Pacific').localize(datetime.strptime(game.game_date + ' ' + game.game_time, '%Y-%m-%d %H:%M')) %}
     <tr>
         <td style="vertical-align : middle; text-align: center;">
             <div style="margin: auto;">
@@ -75,7 +74,7 @@
         <td style="vertical-align : middle;">
             <div style="text-align: center; margin: auto; padding: 20px 20px;">
                 <!-- Print datetime in local timezone -->
-                {{(game_datetime.astimezone(timezone('UTC')).astimezone(tz=None)).strftime('%a, %b %d, %Y %I:%M %p %Z')}}
+                {{game_datetime.astimezone(timezone(user_timezone)).strftime('%a, %b %d, %Y %I:%M %p %Z')}}
             </div>
         </td>
     </tr>

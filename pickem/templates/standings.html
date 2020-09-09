@@ -17,39 +17,37 @@
 </h1>
 <br>
 
-<table>
-    <tr style="outline: thin solid">
-        <div style="display: inline-block; width: 60px;">
-            Name
-        </div>
-        <div style="display: inline-block; width: 60px;">
-            Correct Picks
-        </div>
-        <div style="display: inline-block; width: 10px;">
-
-        </div>
-        <div style="display: inline-block; width: 60px;">
-            Incorrect Picks
-        </div>
+<table is-striped is-hoverable style="margin-left: auto; margin-right: auto;">
+    <tr class="columns is-centered">
+        <td style="display: inline-block; text-align: center; width: 200px;">
+            <strong>Name</strong>
+        </td>
+        <td style="display: inline-block; text-align: center; width: 60px;">
+            <strong>Correct Picks</strong>
+        </td>
+        <td style="display: inline-block; text-align: center; width: 10px;">
+            <strong>&nbsp;</strong>
+        </td>
+        <td style="display: inline-block; text-align: center; width: 60px;">
+            <strong>Incorrect Picks</strong>
+        </td>
     </tr>
-    <br>
     {% for row in standings %}
     <br>
     <tr>
-        <div style="display: inline-block; width: 60px;">
+        <td style="display: inline-block; text-align: center; width: 200px;">
             {{row[0]}}
-        </div>
-        <div style="display: inline-block; width: 60px;">
+        </td>
+        <td style="display: inline-block; text-align: center; width: 60px;">
             {{row[1]}}
-        </div>
-        <div style="display: inline-block; width: 10px;">
+        </td>
+        <td style="display: inline-block; text-align: center; width: 10px;">
             -
-        </div>
-        <div style="display: inline-block; width: 60px;">
+        </td>
+        <td style="display: inline-block; text-align: center; width: 60px;">
             {{row[2]}}
-        </div>
+        </td>
     </tr>
     {% endfor %}
 </table>
-
 {% endblock %}

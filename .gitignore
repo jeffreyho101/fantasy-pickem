@@ -6,3 +6,4 @@ __pycache__
 pickem/db_old
 pickem/*.db
 pickem/DB_SECRET_KEY
+misc_scripts/
