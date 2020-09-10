@@ -45,56 +45,56 @@ def get_week():
     Returns:
         int: The current week of the NFL season
     """
-    w2_start = datetime.strptime("15-09-2020", "%d-%m-%Y").astimezone(
-        timezone('US/Pacific')
+    w2_start = timezone('US/Pacific').localize(
+        datetime.strptime("15-09-2020", "%d-%m-%Y")
     )
-    w3_start = datetime.strptime("22-09-2020", "%d-%m-%Y").astimezone(
-        timezone('US/Pacific')
+    w3_start = timezone('US/Pacific').localize(
+        datetime.strptime("22-09-2020", "%d-%m-%Y")
     )
-    w4_start = datetime.strptime("29-09-2020", "%d-%m-%Y").astimezone(
-        timezone('US/Pacific')
+    w4_start = timezone('US/Pacific').localize(
+        datetime.strptime("29-09-2020", "%d-%m-%Y")
     )
-    w5_start = datetime.strptime("06-10-2020", "%d-%m-%Y").astimezone(
-        timezone('US/Pacific')
+    w5_start = timezone('US/Pacific').localize(
+        datetime.strptime("06-10-2020", "%d-%m-%Y")
     )
-    w6_start = datetime.strptime("13-10-2020", "%d-%m-%Y").astimezone(
-        timezone('US/Pacific')
+    w6_start = timezone('US/Pacific').localize(
+        datetime.strptime("13-10-2020", "%d-%m-%Y")
     )
-    w7_start = datetime.strptime("20-10-2020", "%d-%m-%Y").astimezone(
-        timezone('US/Pacific')
+    w7_start = timezone('US/Pacific').localize(
+        datetime.strptime("20-10-2020", "%d-%m-%Y")
     )
-    w8_start = datetime.strptime("27-10-2020", "%d-%m-%Y").astimezone(
-        timezone('US/Pacific')
+    w8_start = timezone('US/Pacific').localize(
+        datetime.strptime("27-10-2020", "%d-%m-%Y")
     )
-    w9_start = datetime.strptime("03-11-2020", "%d-%m-%Y").astimezone(
-        timezone('US/Pacific')
+    w9_start = timezone('US/Pacific').localize(
+        datetime.strptime("03-11-2020", "%d-%m-%Y")
     )
-    w10_start = datetime.strptime("10-11-2020", "%d-%m-%Y").astimezone(
-        timezone('US/Pacific')
+    w10_start = timezone('US/Pacific').localize(
+        datetime.strptime("10-11-2020", "%d-%m-%Y")
     )
-    w11_start = datetime.strptime("17-11-2020", "%d-%m-%Y").astimezone(
-        timezone('US/Pacific')
+    w11_start = timezone('US/Pacific').localize(
+        datetime.strptime("17-11-2020", "%d-%m-%Y")
     )
-    w12_start = datetime.strptime("24-11-2020", "%d-%m-%Y").astimezone(
-        timezone('US/Pacific')
+    w12_start = timezone('US/Pacific').localize(
+        datetime.strptime("24-11-2020", "%d-%m-%Y")
     )
-    w13_start = datetime.strptime("08-12-2020", "%d-%m-%Y").astimezone(
-        timezone('US/Pacific')
+    w13_start = timezone('US/Pacific').localize(
+        datetime.strptime("08-12-2020", "%d-%m-%Y")
     )
-    w14_start = datetime.strptime("15-12-2020", "%d-%m-%Y").astimezone(
-        timezone('US/Pacific')
+    w14_start = timezone('US/Pacific').localize(
+        datetime.strptime("15-12-2020", "%d-%m-%Y")
     )
-    w15_start = datetime.strptime("22-12-2020", "%d-%m-%Y").astimezone(
-        timezone('US/Pacific')
+    w15_start = timezone('US/Pacific').localize(
+        datetime.strptime("22-12-2020", "%d-%m-%Y")
     )
-    w16_start = datetime.strptime("29-12-2020", "%d-%m-%Y").astimezone(
-        timezone('US/Pacific')
+    w16_start = timezone('US/Pacific').localize(
+        datetime.strptime("29-12-2020", "%d-%m-%Y")
     )
-    w17_start = datetime.strptime("05-12-2020", "%d-%m-%Y").astimezone(
-        timezone('US/Pacific')
+    w17_start = timezone('US/Pacific').localize(
+        datetime.strptime("05-01-2021", "%d-%m-%Y")
     )
-    w17_end = datetime.strptime("12-09-2021", "%d-%m-%Y").astimezone(
-        timezone('US/Pacific')
+    w17_end = timezone('US/Pacific').localize(
+        datetime.strptime("12-01-2021", "%d-%m-%Y")
     )
     week = 0
     if datetime.now(timezone('US/Pacific')) < w2_start:
@@ -213,9 +213,9 @@ def week_picks_post():
     elif saved_pick.pick != selected_pick:
         submit_datetime = datetime.now(timezone('US/Pacific'))
         saved_pick_datetime = saved_pick.game_date + ' ' + saved_pick.game_time
-        game_datetime = datetime.strptime(
-            saved_pick_datetime, '%Y-%m-%d %H:%M'
-        ).astimezone(timezone('US/Pacific'))
+        game_datetime = timezone('US/Pacific').localize(
+            datetime.strptime(saved_pick_datetime, '%Y-%m-%d %H:%M')
+        )
         if submit_datetime >= game_datetime:
             flash(
                 f"Didn't save pick change for {saved_pick.road_team} vs. {saved_pick.home_team} because the game has already started",
