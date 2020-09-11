@@ -7,7 +7,7 @@ from flask_login import login_required, current_user
 from sqlalchemy import text
 
 from . import db
-from .models import Games, Picks
+from .models import Games, Picks, User
 
 
 main = Blueprint('main', __name__)
@@ -138,7 +138,7 @@ def get_week():
 
 @main.route('/week_picks', endpoint='week_picks')
 @login_required
-def week_picks():
+def week_picks(week=get_week()):
     """
     week_picks: Display a player's weekly picks on a page
 
@@ -146,8 +146,6 @@ def week_picks():
         str: A rendering of week_picks.html with the current week and the user's current picks
     """
     # do a lookup of picks beforehand; autofill radio buttons if picks were made
-    week = get_week()
-
     week_games = Picks.query.filter_by(week=week, user_id=current_user.id)
 
     games_all = week_games.order_by(
@@ -163,12 +161,12 @@ def week_picks():
         .order_by(Picks.game_date, Picks.game_time, Picks.game_id)
         .all()
     )
-
     up_list = [up[0] for up in user_picks]
     current_datetime = datetime.now(timezone('US/Pacific'))
     return render_template(
         'week_picks.html',
         week=week,
+        current_username=current_user.name,
         name=current_user.name,
         user_timezone=current_user.timezone,
         games_sql=games_all,
@@ -178,12 +176,14 @@ def week_picks():
         timezone=timezone,
         astimezone=datetime.astimezone,
         utc=utc,
+        week_list=list(range(1, 18)),
+        user_list=[u[0] for u in User.query.with_entities(User.name).all()],
     )
 
 
 @main.route('/week_picks', methods=['POST'])
 @login_required
-def week_picks_post():
+def week_picks_post(week=get_week()):
     """
     week_picks_post: Display a player's weekly picks on a page after processing POST request on a pick
 
@@ -191,49 +191,56 @@ def week_picks_post():
         str: A rendering of week_picks.html with the current week and the user's current picks
         where the pick made by the user gets updated with a POST request
     """
-    week = get_week()
-
-    option = request.form
-    game_id = next(option.keys())
-    selected_pick = option[game_id]
-
-    saved_pick = Picks.query.filter_by(
-        user_id=current_user.id, week=week, game_id=game_id
-    ).first()
-
-    # only rewrite to db if the pick changes
-    if saved_pick is None:
-        # check the current time; only create pick if submit time is before game
-        flash(
-            "Internal error. Contact admin for help if this is still an issue.",
-            'danger',
+    display_name = current_user.name
+    user_id = current_user.id
+    if 'week_display' in request.form:
+        week = int(request.form['week_display'])
+    if 'user_display' in request.form:
+        display_name = request.form['user_display']
+        user_id = (
+            User.query.filter_by(name=display_name).with_entities(User.id).first()[0]
         )
-        return redirect(url_for('main.week_picks'))
+    else:
+        option = request.form
+        game_id = next(option.keys())
+        selected_pick = option[game_id]
 
-    elif saved_pick.pick != selected_pick:
-        submit_datetime = datetime.now(timezone('US/Pacific'))
-        saved_pick_datetime = saved_pick.game_date + ' ' + saved_pick.game_time
-        game_datetime = timezone('US/Pacific').localize(
-            datetime.strptime(saved_pick_datetime, '%Y-%m-%d %H:%M')
-        )
-        if submit_datetime >= game_datetime:
+        saved_pick = Picks.query.filter_by(
+            user_id=current_user.id, week=week, game_id=game_id
+        ).first()
+
+        # only rewrite to db if the pick changes
+        if saved_pick is None:
+            # check the current time; only create pick if submit time is before game
             flash(
-                f"Didn't save pick change for {saved_pick.road_team} vs. {saved_pick.home_team} because the game has already started",
+                "Internal error. Contact admin for help if this is still an issue.",
                 'danger',
             )
             return redirect(url_for('main.week_picks'))
-        else:
-            saved_pick.pick = selected_pick
-            db.session.commit()
 
-    week_games = Picks.query.filter_by(week=week, user_id=current_user.id)
+        elif saved_pick.pick != selected_pick:
+            submit_datetime = datetime.now(timezone('US/Pacific'))
+            saved_pick_datetime = saved_pick.game_date + ' ' + saved_pick.game_time
+            game_datetime = timezone('US/Pacific').localize(
+                datetime.strptime(saved_pick_datetime, '%Y-%m-%d %H:%M')
+            )
+            if submit_datetime >= game_datetime:
+                flash(
+                    f"Didn't save pick change for {saved_pick.road_team} vs. {saved_pick.home_team} because the game has already started",
+                    'danger',
+                )
+                return redirect(url_for('main.week_picks'))
+            else:
+                saved_pick.pick = selected_pick
+                db.session.commit()
+
+    week_games = Picks.query.filter_by(week=week, user_id=user_id)
     games_all = week_games.order_by(
         Picks.game_date, Picks.game_time, Picks.game_id
     ).all()
-
     # do a lookup of picks beforehand; autofill radio buttons if picks were made
     user_picks = (
-        Picks.query.filter_by(user_id=current_user.id, week=week)
+        Picks.query.filter_by(user_id=user_id, week=week)
         .with_entities(Picks.pick)
         .order_by(Picks.game_date, Picks.game_time, Picks.game_id)
         .all()
@@ -244,7 +251,8 @@ def week_picks_post():
     return render_template(
         'week_picks.html',
         week=week,
-        name=current_user.name,
+        current_username=current_user.name,
+        name=display_name,
         user_timezone=current_user.timezone,
         games_sql=games_all,
         user_picks_list=up_list,
@@ -253,6 +261,8 @@ def week_picks_post():
         timezone=timezone,
         astimezone=datetime.astimezone,
         utc=utc,
+        week_list=list(range(1, 18)),
+        user_list=[u[0] for u in User.query.with_entities(User.name).all()],
     )
 
 
@@ -280,7 +290,7 @@ def standings():
     else:
         # query standings directly from sqlite, output in list format to read into html
         overall_standings_query = text(
-            f"select name, count(*), {total_games}-count(*) from picks where winner not null  and winner = pick group by user_id order by count(*) desc"
+            "select name, sum(pick = winner) as correct, sum(pick != winner) as incorrect from picks where winner != '' group by name order by correct desc;"
         )
         result = db.engine.execute(overall_standings_query)
         records = [r for r in result]

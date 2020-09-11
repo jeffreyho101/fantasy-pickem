@@ -16,6 +16,41 @@
     Week {{week}} Picks for {{name}}
 </h1>
 <br>
+<table style="margin-left: auto; margin-right: auto;">
+    <tr>
+        <td style="vertical-align: middle; padding: 10px;">
+            View
+        </td>
+        <td style="vertical-align: middle;">
+            <div class="select">
+                <form method="POST" action="/week_picks">
+                    <div style="display: inline-block;">
+                        <select name="week_display" style="background: #363636; color: #f5f5f5; border-color: #363636"
+                            onchange="this.form.submit()">
+                            {% for w in week_list %}
+                            <option value='{{w}}' {% if week == w %} selected="selected" {% endif %}>
+                                Week {{w}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div style="display: inline-block;">
+                        picks for
+                    </div>
+                    <div style="display: inline-block;">
+                        <select name="user_display" style="background: #363636; color: #f5f5f5; border-color: #363636"
+                            onchange="this.form.submit()">
+                            {% for u in user_list %}
+                            <option value='{{u}}' {% if name == u %} selected="selected" {% endif %}>
+                                {{u}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </td>
+    </tr>
+</table>
+<br>
 <h6>
     Select your picks below! Individual picks lock at the start of each game.
 </h6>
@@ -30,16 +65,33 @@
         <td>&nbsp;</td>
         <td>&nbsp;</td>
     </tr>
+    {% set other_user = (current_username != name) %}
     {% for game in games_sql %}
+
     <!-- game_datetime is in PST -->
     {% set game_datetime = timezone('US/Pacific').localize(datetime.strptime(game.game_date + ' ' + game.game_time, '%Y-%m-%d %H:%M')) %}
+    {% set game_started = ((game.game_date and game.game_time) and (current_datetime >= game_datetime)) %}
+    {% if game.pick is none or (other_user and not game_started)%}
+    {% set bg_color = "#ff00ff" %}
+    {% elif game.winner is not none and game.pick is none %}
+    {% set bg_color = "#787878" %}
+    {% elif game.winner is none and game.pick is not none %}
+    {% set bg_color = "#787878" %}
+    {% elif game.winner is not none and game.pick is not none and game.winner == game.pick %}
+    {% set bg_color = "#098a00" %}
+    {% elif game.winner is not none and game.pick is not none and game.winner != game.pick %}
+    {% set bg_color = "#8a0900" %}
+    {% else %}
+    {% set bg_color = "#363636" %}
+    {% endif %}
     <tr>
+        <td>{{bg_color}}</td>
         <td style="vertical-align : middle; text-align: center;">
             <div style="margin: auto;">
                 <form method="POST" action="/week_picks">
                     <div style="vertical-align: middle; display: table; table-layout: fixed;">
                         <label class="pick"
-                            style="cursor: pointer; {{'background-color: #787878;' if game.road_team in user_picks_list}}; width: 120px; padding: 3px; margin: 0px;">
+                            style="cursor: pointer; {{'background-color: ' + bg_color if game.road_team in user_picks_list or (bg_color == "#ff00ff" and game.winner == game.road_team)}}; width: 120px; padding: 3px; margin: 0px;">
                             <div style="display: inline-block;">
                                 <img src="static/images/{{game.road_team}}.png" alt="{{game.road_team}}"
                                     style="height: 40px;" />
@@ -47,19 +99,19 @@
                             </div>
                             <div style="display: inline-block; padding: 0px 6px;">
                                 <input type="radio" name="{{game.game_id}}" id="{{game.game_id}}"
-                                    value={{game.road_team}} {{'checked' if game.road_team in user_picks_list}}
-                                    {{'disabled' if (game.game_date and game.game_time) and (current_datetime >= game_datetime)}}
-                                    onchange='this.form.submit();'>
+                                    value={{game.road_team}}
+                                    {{'checked' if game.road_team in user_picks_list and (not other_user or game_started)}}
+                                    {{'disabled' if other_user or game_started}} onchange='this.form.submit();'>
                             </div>
                         </label>
                         <div style="display: inline-block; padding: 3px 12px;">vs.</div>
                         <label class="pick"
-                            style="cursor: pointer; {{'background-color: #787878;' if game.home_team in user_picks_list}}; width: 120px; padding: 3px; margin: 0px;">
+                            style="cursor: pointer; {{'background-color: ' + bg_color if game.home_team in user_picks_list or (bg_color == "#ff00ff" and game.winner == game.home_team)}}; width: 120px; padding: 3px; margin: 0px;">
                             <div style="display: inline-block; padding: 0px 6px;">
                                 <input type="radio" name="{{game.game_id}}" id="{{game.game_id}}"
-                                    value={{game.home_team}} {{'checked' if game.home_team in user_picks_list}}
-                                    {{'disabled' if (game.game_date and game.game_time) and (current_datetime >= game_datetime)}}
-                                    onchange='this.form.submit();'>
+                                    value={{game.home_team}}
+                                    {{'checked' if game.home_team in user_picks_list and (not other_user or game_started)}}
+                                    {{'disabled' if other_user or game_started}} onchange='this.form.submit();'>
                             </div>
                             <div style="display: inline-block;">
                                 {{game.home_team}}
