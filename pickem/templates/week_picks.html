@@ -13,47 +13,54 @@
 {% endwith %}
 
 <h1 class="title">
-    Week {{week}} Picks for {{name}}
+    Week {{week}} for {{name}}
 </h1>
-<br>
-<table style="margin-left: auto; margin-right: auto;">
-    <tr>
-        <td style="vertical-align: middle; padding: 10px;">
-            View
-        </td>
-        <td style="vertical-align: middle;">
-            <div class="select">
-                <form method="POST" action="/week_picks">
-                    <div style="display: inline-block;">
-                        <select name="week_display" style="background: #363636; color: #f5f5f5; border-color: #363636"
-                            onchange="this.form.submit()">
-                            {% for w in week_list %}
-                            <option value='{{w}}' {% if week == w %} selected="selected" {% endif %}>
-                                Week {{w}}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div style="display: inline-block;">
-                        picks for
-                    </div>
-                    <div style="display: inline-block;">
-                        <select name="user_display" style="background: #363636; color: #f5f5f5; border-color: #363636"
-                            onchange="this.form.submit()">
-                            {% for u in user_list %}
-                            <option value='{{u}}' {% if name == u %} selected="selected" {% endif %}>
-                                {{u}}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </form>
-            </div>
-        </td>
-    </tr>
-</table>
-<br>
+
 <h6>
-    Select your picks below! Individual picks lock at the start of each game.
+    Select your picks below! Individual picks lock at the start of each game. <br>
+    To view other weeks/players' picks, modify the week number and/or user name below.
 </h6>
+<br>
+<div>
+    <table style="margin-left: auto; margin-right: auto;">
+        <tr>
+            <td style="vertical-align: middle;">
+                <div class="select">
+                    <form method="POST" action="/week_picks">
+                        <h5>
+                            <div style="display: inline-block;">
+                                Selection:
+                            </div>
+                            <div style="display: inline-block;">
+                                <select class="is-hovered" name="week_display"
+                                    style="background: #363636; color: #f5f5f5; border-color: #f5f5f5; padding: 0.2em {{'0.3em' if week < 10 else '0.8em'}} 0.2em 0.8em;"
+                                    onchange="this.form.submit()">
+                                    {% for w in week_list %}
+                                    <option value='{{w}}' {% if week == w %} selected="selected" {% endif %}>
+                                        Week {{w}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div style="display: inline-block;">
+                                picks for
+                            </div>
+                            <div style="display: inline-block;">
+                                <select class="is-hovered" is-loading name="user_display"
+                                    style="background: #363636; color: #f5f5f5; border-color: #f5f5f5"
+                                    onchange="this.form.submit()">
+                                    {% for u in user_list %}
+                                    <option value='{{u}}' {% if name == u %} selected="selected" {% endif %}>
+                                        {{u}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </h5>
+                    </form>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
 <br>
 <table style="margin-left: auto; margin-right: auto;">
     <tr style="border-bottom: 1px solid white;">
@@ -71,10 +78,10 @@
     <!-- game_datetime is in PST -->
     {% set game_datetime = timezone('US/Pacific').localize(datetime.strptime(game.game_date + ' ' + game.game_time, '%Y-%m-%d %H:%M')) %}
     {% set game_started = ((game.game_date and game.game_time) and (current_datetime >= game_datetime)) %}
-    {% if game.pick is none or (other_user and not game_started)%}
-    {% set bg_color = "#ff00ff" %}
+    {% if game.pick is none or (other_user and not game_started) %}
+    {% set bg_color = "#363636" %}
     {% elif game.winner is not none and game.pick is none %}
-    {% set bg_color = "#787878" %}
+    {% set bg_color = "#ff00ff" %}
     {% elif game.winner is none and game.pick is not none %}
     {% set bg_color = "#787878" %}
     {% elif game.winner is not none and game.pick is not none and game.winner == game.pick %}
@@ -85,7 +92,6 @@
     {% set bg_color = "#363636" %}
     {% endif %}
     <tr>
-        <td>{{bg_color}}</td>
         <td style="vertical-align : middle; text-align: center;">
             <div style="margin: auto;">
                 <form method="POST" action="/week_picks">
