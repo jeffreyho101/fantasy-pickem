@@ -77,7 +77,7 @@ def signup_post():
 
     email_pattern = re.compile('^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$')
     valid_email = email_pattern.match(email)
-    valid_name = name != ''
+    valid_name = name != '' and len(name) <= 20
     valid_pass = len(password) >= 8
 
     valid_combo = valid_email and valid_name and valid_pass
@@ -87,7 +87,7 @@ def signup_post():
         if not valid_email:
             flash("Email is invalid.", 'danger')
         if not valid_name:
-            flash("Name is invalid.", 'danger')
+            flash("Name is invalid. Must be between 1 and 20 characters", 'danger')
         if not valid_pass:
             flash("Password is invalid.", 'danger')
         return redirect(url_for('auth.signup'))
@@ -124,6 +124,7 @@ def signup_post():
             game_time='23:59',
             road_team=game.road_team,
             home_team=game.home_team,
+            pick='',
         )
         db.session.add(new_empty_pick)
     db.session.commit()

@@ -287,10 +287,12 @@ def standings():
 
         users = User.query.with_entities(User.name).all()
         records = [(r[0], 0, 0) for r in users]
+        last_week_records = [(r[0], 0, 0) for r in users]
     else:
+        week = get_week()
         # query standings directly from sqlite, output in list format to read into html
         overall_standings_query = text(
-            "select name, sum(pick = winner) as correct, sum(pick != winner) as incorrect from picks where winner != '' group by name order by correct desc;"
+            f"select name, sum(pick = winner) as correct, sum(pick != winner) as incorrect, sum(pick = winner and week = {week-1}) as last_week_correct, sum(pick != winner and week = {week-1}) as last_week_incorrect from picks where winner not null group by name order by correct desc;"
         )
         result = db.engine.execute(overall_standings_query)
         records = [r for r in result]
@@ -314,6 +316,7 @@ def settings():
     Returns:
         str: A rendering of settings.html with the current standings in desc. order of wins
     """
+    display_name = current_user.name
     user_timezone = current_user.timezone
     timezones = [
         "Europe/Berlin",
@@ -326,7 +329,10 @@ def settings():
         "UTC",
     ]
     return render_template(
-        'settings.html', timezones=timezones, user_timezone=user_timezone
+        'settings.html',
+        timezones=timezones,
+        display_name=display_name,
+        user_timezone=user_timezone,
     )
 
 
@@ -339,11 +345,21 @@ def settings_post():
     Returns:
         str: A rendering of settings.html with the current standings in desc. order of wins
     """
+    new_display_name = request.form.get('display_name')
+    if new_display_name == "":
+        new_display_name = current_user.name
+    valid_name = len(new_display_name) <= 20
+    if not valid_name:
+        flash("Name is invalid. Must be between 1 and 20 characters", 'danger')
+        return redirect(url_for('main.settings'))
+
     new_timezone = request.form.get('timezone')
+
     from .models import User
 
     user = User.query.get(current_user.id)
     user.timezone = new_timezone
+    user.name = new_display_name
     db.session.commit()
 
     timezones = [
@@ -356,7 +372,12 @@ def settings_post():
         "US/Pacific",
         "UTC",
     ]
+
+    flash("Successfully changed user settings.", 'success')
     return render_template(
-        'settings.html', timezones=timezones, user_timezone=new_timezone
+        'settings.html',
+        timezones=timezones,
+        display_name=new_display_name,
+        user_timezone=new_timezone,
     )
 
