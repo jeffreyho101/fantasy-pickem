@@ -357,6 +357,11 @@ def settings_post():
 
     from .models import User
 
+    picks_update = text(
+        f"update picks set name = '{new_display_name}' where name = '{current_user.name}'"
+    )
+    db.engine.execute(picks_update)
+
     user = User.query.get(current_user.id)
     user.timezone = new_timezone
     user.name = new_display_name
