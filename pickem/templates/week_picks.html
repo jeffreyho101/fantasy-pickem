@@ -97,7 +97,7 @@
                 <form method="POST" action="/week_picks">
                     <div style="vertical-align: middle; display: table; table-layout: fixed;">
                         <label class="pick"
-                            style="cursor: pointer; {{'background-color: ' + bg_color if game.road_team in user_picks_list or (bg_color == "#ff00ff" and game.winner == game.road_team)}}; width: 120px; padding: 3px; margin: 0px;">
+                            style="cursor: pointer;  border-radius:0.25rem; {{'background-color: ' + bg_color if game.road_team in user_picks_list or (bg_color == "#ff00ff" and game.winner == game.road_team)}}; width: 120px; padding: 3px; margin: 0px;">
                             <div style="display: inline-block;">
                                 <img src="static/images/{{game.road_team}}.png" alt="{{game.road_team}}"
                                     style="height: 40px;" />
@@ -112,7 +112,7 @@
                         </label>
                         <div style="display: inline-block; padding: 3px 12px;">vs.</div>
                         <label class="pick"
-                            style="cursor: pointer; {{'background-color: ' + bg_color if game.home_team in user_picks_list or (bg_color == "#ff00ff" and game.winner == game.home_team)}}; width: 120px; padding: 3px; margin: 0px;">
+                            style="cursor: pointer;  border-radius:0.25rem; {{'background-color: ' + bg_color if game.home_team in user_picks_list or (bg_color == "#ff00ff" and game.winner == game.home_team)}}; width: 120px; padding: 3px; margin: 0px;">
                             <div style="display: inline-block; padding: 0px 6px;">
                                 <input type="radio" name="{{game.game_id}}" id="{{game.game_id}}"
                                     value={{game.home_team}}

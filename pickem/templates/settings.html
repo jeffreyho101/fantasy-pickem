@@ -25,7 +25,7 @@
         <td style="vertical-align: middle;">
             <div class="select">
                 <form method="POST" action="/settings">
-                    <select name="timezone" style="background: #363636; color: #f5f5f5; border-color: #363636"
+                    <select name="timezone" style="background: #363636; color: #f5f5f5; border-color: #363636;"
                         onchange="this.form.submit()">
                         {% for timezone in timezones %}
                         <option value='{{timezone}}' {% if timezone == user_timezone %} selected="selected" {% endif %}>
