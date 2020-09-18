@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<!-- Handle flashes that get triggered from signup -->
+<div class="alert alert-{{ messages.0.0 }}" role="alert">
+    {% for category, message in messages %}
+    {{ message }} </br>
+    {% endfor %}
+</div>{% endif %}
+{% endwith %}
+
+<h1 class="title">
+    Picks Breakdown
+</h1>
+
+<h6>
+    Coming soon!
+</h6>
+
+{% endblock %}

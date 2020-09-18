@@ -31,10 +31,22 @@
                         </a>
                     </li>
                     {% if current_user.is_authenticated %}
-                    <li class="nav-item">
-                        <a href="{{ url_for('main.week_picks') }}" class="navbar-item nav-link active">
-                            Weekly Pickem
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="{{ url_for('main.week_picks') }}" id="navbarDropdown"
+                            role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Pickem
                         </a>
+                        <div class="dropdown-menu dropdown-menu-right" style="background-color: #363636;"
+                            aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item text-light" style="background-color: #363636;"
+                                href="{{ url_for('main.week_picks') }}">
+                                Weekly Pickem
+                            </a>
+                            <a class=" dropdown-item text-light" style="background-color: #363636;"
+                                href="{{ url_for('main.picks_breakdown') }}">
+                                Picks Breakdown
+                            </a>
+                        </div>
                     </li>
                     <li class="nav-item">
                         <a href="{{ url_for('main.standings') }}" class="navbar-item nav-link active">

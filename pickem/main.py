@@ -266,6 +266,32 @@ def week_picks_post(week=get_week()):
     )
 
 
+@main.route('/picks_breakdown')
+@login_required
+def picks_breakdown(week=get_week()):
+    """
+    picks_breakdown: Display a page allowing for a more detailed breakdown of picks
+
+    Returns:
+        str: A rendering of picks_breakdown.html with default pick breakdown for the given week
+    """
+    current_datetime = datetime.now(timezone('US/Pacific'))
+    return render_template('picks_breakdown.html', week=week,)
+
+
+@main.route('/picks_breakdown', methods=['POST'])
+@login_required
+def picks_breakdown_post(week=get_week()):
+    """
+    picks_breakdown: Display a player's weekly picks on a page after processing POST request on a pick
+
+    Returns:
+        str: A rendering of picks_breakdown.html with parameters that are updated with a POST request
+    """
+    current_datetime = datetime.now(timezone('US/Pacific'))
+    return render_template('picks_breakdown.html', week=week,)
+
+
 @main.route('/standings', endpoint='standings')
 @login_required
 def standings():
