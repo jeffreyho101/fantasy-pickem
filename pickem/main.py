@@ -307,18 +307,18 @@ def standings():
         .distinct()
         .all()
     )
+    # records: [user, ovr_w, ovr_l, tw_w, tw_l, lw_w, lw_l,]
     records = []
     if total_games == 0:
         from .models import User
 
         users = User.query.with_entities(User.name).all()
-        records = [(r[0], 0, 0) for r in users]
-        last_week_records = [(r[0], 0, 0) for r in users]
+        records = [(r[0], 0, 0, 0, 0, 0, 0) for r in users]
     else:
         week = get_week()
         # query standings directly from sqlite, output in list format to read into html
         overall_standings_query = text(
-            f"select name, sum(pick = winner) as correct, sum(pick != winner) as incorrect, sum(pick = winner and week = {week-1}) as last_week_correct, sum(pick != winner and week = {week-1}) as last_week_incorrect from picks where winner not null group by name order by correct desc;"
+            f"select name, sum(pick = winner) as correct, sum(pick != winner) as incorrect, sum(pick = winner and week = {week}) as this_week_correct, sum(pick != winner and week = {week}) as this_week_incorrect, sum(pick = winner and week = {week-1}) as last_week_correct, sum(pick != winner and week = {week-1}) as last_week_incorrect from picks where winner not null group by name order by correct desc;"
         )
         result = db.engine.execute(overall_standings_query)
         records = [r for r in result]
