@@ -208,7 +208,6 @@ def week_picks_post(week=get_week()):
         saved_pick = Picks.query.filter_by(
             user_id=current_user.id, week=week, game_id=game_id
         ).first()
-
         # only rewrite to db if the pick changes
         if saved_pick is None:
             # check the current time; only create pick if submit time is before game
@@ -231,7 +230,8 @@ def week_picks_post(week=get_week()):
                 )
                 return redirect(url_for('main.week_picks'))
             else:
-                saved_pick.pick = selected_pick
+                update_text = text(f"update picks set pick = '{selected_pick}' where user_id = {user_id} and game_id = {game_id}")
+                db.engine.execute(update_text)
                 db.session.commit()
 
     week_games = Picks.query.filter_by(week=week, user_id=user_id)
