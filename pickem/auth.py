@@ -42,7 +42,9 @@ def login_post():
 
     # check if the user actually exists
     # take the user-supplied password, hash it, and compare it to the hashed password in the database
-    if not result_first or not bcrypt.checkpw(password, result_first.password):
+    if not result_first or not bcrypt.checkpw(
+        password, result_first.password.encode("utf-8")
+    ):
         flash('Email and password do not match.', 'danger')
         return redirect(
             url_for('auth.login')

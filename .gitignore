@@ -3,6 +3,8 @@ __pycache__
 *.python-version
 .vscode
 
+venv/
+
 pickem/db_old
 pickem/*.db
 pickem/DB_SECRET_KEY
