@@ -3,6 +3,7 @@ import re
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_user, logout_user, login_required
 import bcrypt
+from sqlalchemy import text
 
 from .models import User, Games, Picks
 from . import db
@@ -35,10 +36,13 @@ def login_post():
     remember = True if request.form.get('remember') else False
 
     user = User.query.filter_by(email=email).first()
+    query = text(f"select * from user where email = '{email}' limit 1;")
+    result = db.engine.execute(query)
+    result_first = result.first()
 
     # check if the user actually exists
     # take the user-supplied password, hash it, and compare it to the hashed password in the database
-    if not user or not bcrypt.checkpw(password, user.password):
+    if not result_first or not bcrypt.checkpw(password, result_first.password.encode("utf-8")):
         flash('Email and password do not match.', 'danger')
         return redirect(
             url_for('auth.login')
@@ -91,10 +95,12 @@ def signup_post():
         return redirect(url_for('auth.signup'))
 
     # check to see if existing user with given email exists in db
-    user = User.query.filter_by(email=email).first()
+    query = text(f"select * from user where email = '{email}' limit 1;")
+    result = db.engine.execute(query)
+    result_first = result.first()
 
     # if user with same email exists, refresh signup page
-    if user:
+    if result_first:
         flash(
             'An account with this email already exists. Go to the login page to log in.',
             'danger',
