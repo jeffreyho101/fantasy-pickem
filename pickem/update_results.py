@@ -36,4 +36,3 @@ def update_results(week, game_id, winner):
     for pick in game_picks:
         pick.winner = winner
     db.session.commit()
-

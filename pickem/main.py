@@ -38,107 +38,27 @@ def date_inbetween(start, end):
     return start <= datetime.now(timezone('US/Pacific')) <= end
 
 
-def get_week():
+def display_week(now=datetime.now()):
     """
-    get_week: Get the current week based on what time it currently is
+    get_week: Get the current week based on what time it currently is.
+              Assume that pickem weeks start on Wednesday.
 
     Returns:
         int: The current week of the NFL season
     """
-    w2_start = timezone('US/Pacific').localize(
-        datetime.strptime("15-09-2020", "%d-%m-%Y")
-    )
-    w3_start = timezone('US/Pacific').localize(
-        datetime.strptime("22-09-2020", "%d-%m-%Y")
-    )
-    w4_start = timezone('US/Pacific').localize(
-        datetime.strptime("29-09-2020", "%d-%m-%Y")
-    )
-    w5_start = timezone('US/Pacific').localize(
-        datetime.strptime("06-10-2020", "%d-%m-%Y")
-    )
-    w6_start = timezone('US/Pacific').localize(
-        datetime.strptime("13-10-2020", "%d-%m-%Y")
-    )
-    w7_start = timezone('US/Pacific').localize(
-        datetime.strptime("20-10-2020", "%d-%m-%Y")
-    )
-    w8_start = timezone('US/Pacific').localize(
-        datetime.strptime("27-10-2020", "%d-%m-%Y")
-    )
-    w9_start = timezone('US/Pacific').localize(
-        datetime.strptime("03-11-2020", "%d-%m-%Y")
-    )
-    w10_start = timezone('US/Pacific').localize(
-        datetime.strptime("10-11-2020", "%d-%m-%Y")
-    )
-    w11_start = timezone('US/Pacific').localize(
-        datetime.strptime("17-11-2020", "%d-%m-%Y")
-    )
-    w12_start = timezone('US/Pacific').localize(
-        datetime.strptime("24-11-2020", "%d-%m-%Y")
-    )
-    w13_start = timezone('US/Pacific').localize(
-        datetime.strptime("08-12-2020", "%d-%m-%Y")
-    )
-    w14_start = timezone('US/Pacific').localize(
-        datetime.strptime("15-12-2020", "%d-%m-%Y")
-    )
-    w15_start = timezone('US/Pacific').localize(
-        datetime.strptime("22-12-2020", "%d-%m-%Y")
-    )
-    w16_start = timezone('US/Pacific').localize(
-        datetime.strptime("29-12-2020", "%d-%m-%Y")
-    )
-    w17_start = timezone('US/Pacific').localize(
-        datetime.strptime("05-01-2021", "%d-%m-%Y")
-    )
-    w17_end = timezone('US/Pacific').localize(
-        datetime.strptime("12-01-2021", "%d-%m-%Y")
-    )
-    week = 0
-    if datetime.now(timezone('US/Pacific')) < w2_start:
-        week = 1
-    elif date_inbetween(w2_start, w3_start):
-        week = 2
-    elif date_inbetween(w3_start, w4_start):
-        week = 3
-    elif date_inbetween(w4_start, w5_start):
-        week = 4
-    elif date_inbetween(w5_start, w6_start):
-        week = 5
-    elif date_inbetween(w6_start, w7_start):
-        week = 6
-    elif date_inbetween(w7_start, w8_start):
-        week = 7
-    elif date_inbetween(w8_start, w9_start):
-        week = 8
-    elif date_inbetween(w9_start, w10_start):
-        week = 9
-    elif date_inbetween(w10_start, w11_start):
-        week = 10
-    elif date_inbetween(w11_start, w12_start):
-        week = 11
-    elif date_inbetween(w12_start, w13_start):
-        week = 12
-    elif date_inbetween(w13_start, w14_start):
-        week = 13
-    elif date_inbetween(w14_start, w15_start):
-        week = 14
-    elif date_inbetween(w15_start, w16_start):
-        week = 15
-    elif date_inbetween(w16_start, w17_start):
-        week = 16
-    elif date_inbetween(w17_start, w17_end):
-        week = 17
-    else:
-        week = 18
+    w1_start = datetime.strptime("2021-09-08", "%Y-%m-%d")
+    week = 1
+    while week < 18:
+        if now - timedelta(days=7) < w1_start:
+            break
+        week += 1
+        now -= timedelta(days=7)
     return week
 
 
 @main.route('/week_picks', endpoint='week_picks')
 @login_required
-def week_picks(week=get_week()):
+def week_picks(week=display_week()):
     """
     week_picks: Display a player's weekly picks on a page
 
@@ -183,7 +103,7 @@ def week_picks(week=get_week()):
 
 @main.route('/week_picks', methods=['POST'])
 @login_required
-def week_picks_post(week=get_week()):
+def week_picks_post(week=display_week()):
     """
     week_picks_post: Display a player's weekly picks on a page after processing POST request on a pick
 
@@ -230,7 +150,9 @@ def week_picks_post(week=get_week()):
                 )
                 return redirect(url_for('main.week_picks'))
             else:
-                update_text = text(f"update picks set pick = '{selected_pick}' where user_id = {user_id} and game_id = {game_id}")
+                update_text = text(
+                    f"update picks set pick = '{selected_pick}' where user_id = {user_id} and game_id = {game_id}"
+                )
                 db.engine.execute(update_text)
                 db.session.commit()
 
@@ -268,7 +190,7 @@ def week_picks_post(week=get_week()):
 
 @main.route('/picks_breakdown')
 @login_required
-def picks_breakdown(week=get_week()):
+def picks_breakdown(week=display_week()):
     """
     picks_breakdown: Display a page allowing for a more detailed breakdown of picks
 
@@ -281,7 +203,7 @@ def picks_breakdown(week=get_week()):
 
 @main.route('/picks_breakdown', methods=['POST'])
 @login_required
-def picks_breakdown_post(week=get_week()):
+def picks_breakdown_post(week=display_week()):
     """
     picks_breakdown: Display a player's weekly picks on a page after processing POST request on a pick
 
@@ -315,7 +237,7 @@ def standings():
         users = User.query.with_entities(User.name).all()
         records = [(r[0], 0, 0, 0, 0, 0, 0) for r in users]
     else:
-        week = get_week()
+        week = display_week()
         # query standings directly from sqlite, output in list format to read into html
         overall_standings_query = text(
             f"select name, sum(pick = winner) as correct, sum(pick != winner) as incorrect, sum(pick = winner and week = {week}) as this_week_correct, sum(pick != winner and week = {week}) as this_week_incorrect, sum(pick = winner and week = {week-1}) as last_week_correct, sum(pick != winner and week = {week-1}) as last_week_incorrect from picks where winner not null group by name order by correct desc;"
@@ -411,4 +333,3 @@ def settings_post():
         display_name=new_display_name,
         user_timezone=new_timezone,
     )
-
