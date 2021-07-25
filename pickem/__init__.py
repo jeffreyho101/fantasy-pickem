@@ -105,10 +105,75 @@ def init_schedule_espn():
     sched_list['home_pts'] = 0
     sched_list['final'] = False
     sched_list['winner'] = ''
-    # sched_list['game_id'] = sched_list.index
+
     sched_list = sched_list.drop(columns=['index'])
 
     return sched_list
+
+
+def init_schedule_fbref():
+    """
+    init_schedule_espn: Read in the initial schedule matchups by scraping from FootballReference and cleaning
+
+    Returns:
+        pd.DataFrame: A Pandas DataFrame of (week, road_team, home_team, ...) for the 2020 NFL Season
+    """
+    # scrape schedule table from ESPN
+    res = requests.get("https://www.pro-football-reference.com/years/2021/games.htm")
+    soup = BeautifulSoup(res.content, 'lxml')
+    table = soup.find_all('table')[0]
+    sched_grid = pd.read_html(str(table))[0]
+
+    # rename columns, make "CalDate" a string instead of an object type
+    sched_grid = sched_grid.rename(
+        columns={
+            'Unnamed: 2': 'CalDate',
+            'VisTm': 'Visitor',
+            'HomeTm': 'Home',
+            'Pts': 'road_pts',
+            'Pts.1': 'home_pts',
+        }
+    )
+    sched_grid['CalDate'] = sched_grid['CalDate'].astype(str)
+
+    # Filter df based on integer week, to exclude preseason and extra filler rows
+    sched_grid_filtered = sched_grid[
+        pd.to_numeric(sched_grid['Week'], errors='coerce').notnull()
+    ]
+    # add "year" col - apparently there are no "year" entries
+    sched_grid_filtered['Year'] = sched_grid_filtered.apply(
+        lambda row: '2022' if int(row.Week) >= 17 else '2021', axis=1
+    )
+
+    sched_grid_filtered['Date'] = sched_grid_filtered.loc[
+        :, ['Day', 'CalDate', 'Year', 'Time']
+    ].agg(' '.join, axis=1)
+    # keep week, vistm, vispts, hometm, homepts, date
+    sched_grid_filtered = sched_grid_filtered.loc[
+        :, ['Week', 'Visitor', 'road_pts', 'Home', 'home_pts', 'Date']
+    ]
+
+    # Add abbreviations from nfl_teams table
+    # table c/o https://gist.github.com/cnizzardini/13d0a072adb35a0d5817
+    nfl_teams = pd.read_csv('pickem/static/files/nfl_teams.csv')
+    nfl_teams_abb = nfl_teams.loc[:, ['Name', 'Abbreviation']]
+    sched_grid_filtered = sched_grid_filtered.join(
+        nfl_teams_abb.set_index('Name'), on='Visitor'
+    )
+    sched_grid_filtered = sched_grid_filtered.rename(
+        columns={'Abbreviation': 'road_team'}
+    )
+    sched_grid_filtered = sched_grid_filtered.join(
+        nfl_teams_abb.set_index('Name'), on='Home'
+    )
+    sched_grid_filtered = sched_grid_filtered.rename(
+        columns={'Abbreviation': 'home_team'}
+    )
+
+    sched_grid_filtered.reset_index(inplace=True, drop=True)
+    sched_grid_filtered.to_csv("pickem/static/files/schedule_2021_fbref.csv")
+
+    return sched_grid_filtered
 
 
 def init_schedule():

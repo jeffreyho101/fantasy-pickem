@@ -24,20 +24,6 @@ def index():
     return render_template('index.html', current_user=current_user)
 
 
-def date_inbetween(start, end):
-    """
-    date_inbetween: determines whether the time is currently between start and end
-
-    Args:
-        start (datetime.datetime): start time
-        end (datetime.datetime): start time
-
-    Returns:
-        bool: Whether the current time is between start and end
-    """
-    return start <= datetime.now(timezone('US/Pacific')) <= end
-
-
 def display_week(now=datetime.now()):
     """
     get_week: Get the current week based on what time it currently is.
