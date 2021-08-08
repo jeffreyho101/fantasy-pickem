@@ -5,7 +5,7 @@ from flask_login import login_user, logout_user, login_required
 import bcrypt
 from sqlalchemy import text
 
-from .models import User, Games, Picks
+from .models import User, Games2021, Picks
 from . import db
 
 auth = Blueprint('auth', __name__)
@@ -42,9 +42,7 @@ def login_post():
 
     # check if the user actually exists
     # take the user-supplied password, hash it, and compare it to the hashed password in the database
-    if not result_first or not bcrypt.checkpw(
-        password, result_first.password.encode("utf-8")
-    ):
+    if not result_first or not bcrypt.checkpw(password, result_first.password):
         flash('Email and password do not match.', 'danger')
         return redirect(
             url_for('auth.login')
@@ -118,7 +116,7 @@ def signup_post():
     db.session.add(new_user)
 
     # add schedule with all blank picks for new user into Picks table
-    games_list = Games.query.all()
+    games_list = Games2021.query.all()
 
     for game in games_list:
         new_empty_pick = Picks(
@@ -126,8 +124,8 @@ def signup_post():
             name=new_user.name,
             week=game.week,
             game_id=game.game_id,
-            game_date='2000-01-01',
-            game_time='23:59',
+            game_date=game.game_date,
+            game_time=game.game_time_pst,
             road_team=game.road_team,
             home_team=game.home_team,
             pick='',

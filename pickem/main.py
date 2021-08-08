@@ -7,7 +7,7 @@ from flask_login import login_required, current_user
 from sqlalchemy import text
 
 from . import db
-from .models import Games, Picks, User
+from .models import Games2021, Picks, User
 
 
 main = Blueprint('main', __name__)
@@ -126,9 +126,15 @@ def week_picks_post(week=display_week()):
         elif saved_pick.pick != selected_pick:
             submit_datetime = datetime.now(timezone('US/Pacific'))
             saved_pick_datetime = saved_pick.game_date + ' ' + saved_pick.game_time
-            game_datetime = timezone('US/Pacific').localize(
-                datetime.strptime(saved_pick_datetime, '%Y-%m-%d %H:%M')
-            )
+            try:
+                game_datetime = timezone('US/Pacific').localize(
+                    datetime.strptime(saved_pick_datetime, '%Y-%m-%d %H:%M:%S')
+                )
+            except ValueError:
+                game_datetime = timezone('US/Pacific').localize(
+                    datetime.strptime(saved_pick_datetime, '%Y-%m-%d %H:%M')
+                )
+
             if submit_datetime >= game_datetime:
                 flash(
                     f"Didn't save pick change for {saved_pick.road_team} vs. {saved_pick.home_team} because the game has already started",

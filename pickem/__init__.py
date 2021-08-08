@@ -21,7 +21,7 @@ def db_config():
         db_key = file.readline().strip()
 
     app.config['SECRET_KEY'] = db_key
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pickem_tables.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pickem_tables_2021.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     return app
 
@@ -68,7 +68,7 @@ def init_schedule_locally():
     Returns:
         pd.DataFrame: A Pandas DataFrame of (week, road_team, home_team, ...) for the 2020 NFL Season
     """
-    return pd.read_csv('pickem/static/files/matchups_2020.csv')
+    return pd.read_csv('pickem/static/files/schedule_2021_fbref.csv')
 
 
 def init_schedule_espn():
@@ -170,9 +170,37 @@ def init_schedule_fbref():
         columns={'Abbreviation': 'home_team'}
     )
 
-    sched_grid_filtered.reset_index(inplace=True, drop=True)
-    sched_grid_filtered.to_csv("pickem/static/files/schedule_2021_fbref.csv")
+    sched_grid_filtered['date_dt'] = pd.to_datetime(sched_grid_filtered['Date'])
+    sched_grid_filtered['date'] = sched_grid_filtered['date_dt'].dt.date
+    sched_grid_filtered['time_pst'] = sched_grid_filtered['date_dt'].dt.time
+    sched_grid_filtered = sched_grid_filtered.drop(columns=['Date', 'date_dt'])
 
+    def not_started(colname):
+        '''
+        string -> pd col. of bools: return whether column is null or has 0 pts
+
+        df_colname: string
+        '''
+        return (sched_grid_filtered[colname].isnull()) | (
+            sched_grid_filtered[colname] == 0
+        )
+
+    # score is final if:
+    #   - road_pts = NaN or road_pts = 0    AND
+    #   - home_pts = NaN or home_pts = 0
+    sched_grid_filtered['final'] = (
+        ~((not_started('road_pts')) | (not_started('home_pts')))
+    ).astype(int)
+    sched_grid_filtered = (
+        sched_grid_filtered.reset_index(drop=True).rename_axis('game_id').reset_index()
+    )
+    # 1-index sched_grid game_id
+    sched_grid_filtered['game_id'] += 1
+
+    # export to csv as backup
+    sched_grid_filtered.to_csv(
+        "pickem/static/files/schedule_2021_fbref.csv", index=False
+    )
     return sched_grid_filtered
 
 
@@ -182,22 +210,23 @@ def init_schedule():
         and adding them via the Games model
     """
     sched_list = init_schedule_locally()
-    from .models import Games
+    from .models import Games2021
 
     app = db_config()
     db.init_app(app)
     with app.app_context():
         for index, row in sched_list.iterrows():
-            game_add = Games(
-                week=row['week'],
+            game_add = Games2021(
+                week=row['Week'],
+                visitor_fullname=row['Visitor'],
+                road_pts=0,
+                home_fullname=row['Home'],
+                home_pts=0,
                 road_team=row['road_team'],
                 home_team=row['home_team'],
-                game_date=row['game_date'],
-                game_time=row['game_time'],
-                road_pts=0,
-                home_pts=0,
+                game_date=row['date'],
+                game_time_pst=row['time_pst'],
                 final=False,
-                winner='',
             )
             db.session.add(game_add)
             db.session.commit()
