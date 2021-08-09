@@ -44,3 +44,15 @@ OR
 ```
 python run.py
 ```
+
+## Backporting old user data and populating the picks table
+
+- Copy the user table to the new db
+- wipe picks table (optional)
+- re-add to picks table based on user
+
+By script:
+```
+sqlite3 pickem/<old db name> ".dump user" | sqlite3 pickem/<new db name>.db
+python backport.py
+```
