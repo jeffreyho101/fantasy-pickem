@@ -99,9 +99,11 @@ def week_picks_post(week=display_week()):
     """
     display_name = current_user.name
     user_id = current_user.id
-    if 'week_display' in request.form:
+    first_form = request.form.to_dict()
+
+    if 'week_display' in first_form:
         week = int(request.form['week_display'])
-    if 'user_display' in request.form:
+    if 'user_display' in first_form:
         display_name = request.form['user_display']
         user_id = (
             User.query.filter_by(name=display_name).with_entities(User.id).first()[0]
@@ -111,9 +113,24 @@ def week_picks_post(week=display_week()):
         game_id = next(option.keys())
         selected_pick = option[game_id]
 
+        get_week_query = text(
+            f"select week from games2021 where game_id = {int(game_id)} limit 1;"
+        )
+        res = db.engine.execute(get_week_query)
+        if not res:
+            # check the current time; only create pick if submit time is before game
+            flash(
+                "Internal error. Contact admin for help if this is still an issue.",
+                'danger',
+            )
+            return redirect(url_for('main.week_picks'))
+
+        week = res.first().week
+
         saved_pick = Picks.query.filter_by(
             user_id=current_user.id, week=week, game_id=game_id
         ).first()
+
         # only rewrite to db if the pick changes
         if saved_pick is None:
             # check the current time; only create pick if submit time is before game
