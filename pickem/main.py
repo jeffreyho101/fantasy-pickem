@@ -82,7 +82,7 @@ def week_picks(week=display_week()):
         timezone=timezone,
         astimezone=datetime.astimezone,
         utc=utc,
-        week_list=list(range(1, 18)),
+        week_list=list(range(1, 18+1)),
         user_list=[u[0] for u in User.query.with_entities(User.name).all()],
     )
 

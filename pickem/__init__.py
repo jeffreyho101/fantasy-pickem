@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from datetime import timedelta
 from flask import Flask, render_template, _app_ctx_stack
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
@@ -170,10 +171,15 @@ def init_schedule_fbref():
         columns={'Abbreviation': 'home_team'}
     )
 
-    sched_grid_filtered['date_dt'] = pd.to_datetime(sched_grid_filtered['Date'])
-    sched_grid_filtered['date'] = sched_grid_filtered['date_dt'].dt.date
-    sched_grid_filtered['time_pst'] = sched_grid_filtered['date_dt'].dt.time
-    sched_grid_filtered = sched_grid_filtered.drop(columns=['Date', 'date_dt'])
+    breakpoint()
+    # times on fb-ref are in EST. convert to PST
+    sched_grid_filtered['date_dt_pst'] = pd.to_datetime(
+        sched_grid_filtered['Date']
+    ) - timedelta(hours=3)
+    sched_grid_filtered['date'] = sched_grid_filtered['date_dt_pst'].dt.date
+
+    sched_grid_filtered['time_pst'] = sched_grid_filtered['date_dt_pst'].dt.time
+    sched_grid_filtered = sched_grid_filtered.drop(columns=['Date', 'date_dt_pst'])
 
     def not_started(colname):
         '''
